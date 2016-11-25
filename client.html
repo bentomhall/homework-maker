@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Homework Maker</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+  <body>
+          <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+        <script> $('add-question-button').on('click', function(e) {
+        addQuestion();
+        return false;
+    });</script>
+    <script src="js/navigation.js"></script>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12"><h1 class="text-center">Homework Maker</h1></div>
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+                <div class="form-group">
+                    <label>Assignment Title:</label>
+                    <input class="form-control" type="text" id="assignment-title"/>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-md-8"><!--question form here-->
+            <form id='question-details' onsubmit="return false;">
+                <div class="form-group">
+                    <label for="question-title">Question Title</label>
+                    <input type="text" class="form-control" id="question-title" placeholder="Question Title"/>
+                </div>
+                <div class="form-group">
+                    <label for="question-answer">Question Type</label>
+                    <select class="form-control" id="question-type" onchange="questionTypeChanged();">
+                        <option value="exact-case">Case-insensitive text</option>
+                        <option value="numeric-within">Numeric answer with 2% tolerance</option>
+                        <option value="exact">Exact comparison (text or number)</option>
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="contains-any">Submission matches any (space separated)</option>
+                        <option value="contains-all">Sumbission matches all (space separated)</option>
+                    </select>
+                </div>
+                <div class="form-group prompts" id="question-prompts">
+                    <label>Answer Prompts</label>
+                    <ol>
+                        <li><input type="text" class="form-control prompt-item"/></li>
+                        <li><input type="text" class="form-control prompt-item"/></li>
+                        <li><input type="text" class="form-control prompt-item"/></li>
+                        <li><input type="text" class="form-control prompt-item"/></li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label for="question-text">Question Text</label>
+                    <textarea class="form-control" id="question-text" placeholder="Question Text"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="question-hint">Question Hint</label>
+                    <textarea class="form-control" id="question-hint" placeholder="Question Hint"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="question-answer">Question Answer</label>
+                    <input type="text" class="form-control" id="question-answer" placeholder="Answer"/>
+                </div>
+                
+                <button id="add-question-button" onclick="addQuestion();">Add Question</button>
+                <button id="clear-question-button" onclick="clearQuestion();">Clear Question</button>
+            </form>
+            
+            </div>
+            <div class="col-md-4"><!--current saved questions -->
+                <table class="question-output">
+                    <thead class="question-header">
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th class="text-center">Title</th>
+                            <th class="text-center">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="current-questions">
+                    </tbody>
+                </table>
+                <div id="download-info"></div>
+                <textarea id="output-json"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12"></div>
+        </div>
+    </div>
+
+
+
+
+  </body>
+</html>

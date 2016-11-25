@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>[@title]</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="validation.js"></script>
+</head>
+<body onload="validateHomePageLinks()">
+    <div class="container">
+        <h1 id="problem-set">[@title]</h1>
+        <ol id="problem-listing">
+            [@questions]
+        </ol>
+        <div id="completion-code">Your completion code is [@r] </div>
+        <a id="clear-validation" href="#" onclick="resetAllValidation()">Clear Answers</a>
+        <a id="next-page" href="question1.html">Start &gt;</a>
+    </div>
+</body>
+</html>
