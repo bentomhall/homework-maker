@@ -163,8 +163,20 @@ foreach ($data["questions"] as $qdata){
 build_index($title, $titles);
 copy_supporting_files($i);
 $output = create_zip($title, $i);
+if (file_exists($output)) {
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachement; filename="'.basename($output).'"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: '.filesize($output));
+    readfile($output);
+}
+
+/*
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", $output);
 echo $downloadTemplate->output();
-
+*/
 ?>
