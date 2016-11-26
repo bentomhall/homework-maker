@@ -71,17 +71,37 @@ function addQuestion() {
     return false;
 }
 
+function createFromJson () {
+    var data = $('#output-json').val(),
+        json = JSON.parse(data);
+    if (json['title'] === undefined || json['questions'].length === 0) {
+        alert('Must supply valid JSON');
+        return false;
+    }
+    else {
+    var url = 'create_assignment.php',
+        handler = updatePage;
+    $.post(url, data, handler).fail(function(data) {onFailure(data);});
+    }
+}
+
 function questionTypeChanged(){
     var isMultipleChoice = $('#question-type').val() === 'multiple-choice';
     $("#question-prompts").toggleClass('visible', isMultipleChoice);
 }
 
 function updatePage(data) {
-    if 
     console.log(data);
     var element = $('#download-info');
     element.append(data);
     element.show(); 
+}
+
+function onFailure(data) {
+    var element = $('#download-info');
+    element.append("<h1>FAILED</h1>");
+    element.append(data);
+    element.show();
 }
 
 function makeRequest() {
@@ -96,5 +116,5 @@ function makeRequest() {
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
         handler = updatePage;
-    $.post(url, jsonData, handler).fail(function(data) {alert(data);});
+    $.post(url, jsonData, handler).fail(function(data) {onFailure(data);});
 }

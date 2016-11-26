@@ -121,6 +121,8 @@ function create_zip($title, $number_of_questions){
     for ($i = 1; $i < $number_of_questions; $i++) {
         $supporting_files[] = "question$i.html";
     }
+    $filename = urlencode($title).".zip";
+
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
     }
@@ -156,12 +158,12 @@ function validate_json($json){
             $response_text = '<p class="invalid">Question specification invalid for question with title '.htmlspecialchars($q["title"]).'</p>';
             $is_valid = false;
         }
-        else if ($q["type"] == "multiple-choice" && !count($q["prompts"]) == 0){
-            $response_text = '<p class="invalid">Multiple choice questions must have at least one prompt</p>';
+        else if ($q["type"] == "multiple-choice" && count($q["prompts"]) == 0){
+            $response_text = '<p class="invalid">Multiple choice question titled "'.$q['title']. '" must have at least one prompt</p>';
             $is_valid = false;
         }
     }
-    if (!$is_valid) { http_response_code(400); echo $response_text;}
+    if (!$is_valid) { /*http_response_code(400);*/ echo $response_text;}
     return $is_valid;
         
 }
