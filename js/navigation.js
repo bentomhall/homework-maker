@@ -77,6 +77,10 @@ function createFromJson () {
         alert('Must supply valid JSON');
         return false;
     }
+    var jsonData = JSON.stringify(document.assignment),
+        url = 'create_assignment.php',
+        handler = updatePage;
+    $.post(url, jsonData, handler).fail(function(data) {alert(data);});
 }
 
 function questionTypeChanged(){
@@ -85,7 +89,6 @@ function questionTypeChanged(){
 }
 
 function updatePage(data) {
-    if 
     console.log(data);
     var element = $('#download-info');
     element.append(data);
