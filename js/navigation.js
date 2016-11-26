@@ -71,6 +71,14 @@ function addQuestion() {
     return false;
 }
 
+function createFromJson () {
+    var data = $('#output-json').val();
+    if (data['title'] === undefined || data['questions'].length === 0) {
+        alert('Must supply valid JSON');
+        return false;
+    }
+}
+
 function questionTypeChanged(){
     var isMultipleChoice = $('#question-type').val() === 'multiple-choice';
     $("#question-prompts").toggleClass('visible', isMultipleChoice);

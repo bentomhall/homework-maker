@@ -107,7 +107,7 @@ function copy_supporting_files($number_of_questions){
 
 function create_zip($title, $number_of_questions){
     $zip = new ZipArchive();
-    $filename = $title.".zip";
+    $filename = urlencode($title).".zip";
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
     }
@@ -178,8 +178,4 @@ if (file_exists($output)) {
 else {
     echo 'derp--created file not found';
 }
-
-/*
-
-*/
 ?>

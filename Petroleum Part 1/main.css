@@ -1,0 +1,79 @@
+#answer, #question-type, #question-id {
+  display: none;
+}
+
+body {
+  background-color: lightgrey;
+}
+
+.container {
+  width: 80%;
+  margin-left: 10%;
+  background-color: white;
+  padding-left: 1em;
+  padding-bottom: 1em;
+  padding-right: 1em;
+}
+
+.container:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+h1 {
+  text-align: center;
+}
+
+#problem-listing li {
+  margin-top: 0.5em;
+}
+
+#problem-listing {
+  margin-bottom: 0.5em;
+}
+
+#next-page {
+  float: right;
+  font-size: 1.5em;
+  text-align: right;
+  margin-bottom: 0.1em;
+}
+
+#clear-validation {
+  font-size: 1.5em;
+  margin-left: 0%;
+  float: left;
+}
+.validation-icon {
+  position: relative;
+  top: 8px;
+  width: 20px;
+  height: 20px;
+  visibility: hidden;
+}
+
+#hint {
+  width: 50%;
+  visibility: hidden;
+}
+
+.correct {
+  background-color: #00ff00;
+  color: black;
+  list-style-image: url('correct_16.png');
+}
+
+.incorrect {
+  background-color: red;
+  color: black;
+  list-style-image: url('incorrect_16.png');
+}
+
+.unchecked {
+  color: black;
+}
+
+#completion-code {
+  visibility: hidden
+}
