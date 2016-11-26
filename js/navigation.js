@@ -72,12 +72,12 @@ function addQuestion() {
 }
 
 function createFromJson () {
-    var data = $('#output-json').val();
+    var data = JSON.parse($('#output-json').val());
     if (data['title'] === undefined || data['questions'].length === 0) {
         alert('Must supply valid JSON');
         return false;
     }
-    var jsonData = JSON.stringify(document.assignment),
+    var jsonData = JSON.stringify(data),
         url = 'create_assignment.php',
         handler = updatePage;
     $.post(url, jsonData, handler).fail(function(data) {alert(data);});
