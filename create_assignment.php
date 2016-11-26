@@ -144,17 +144,16 @@ function validate_json($json){
             $is_valid = false;
         }
     }
-    //if (!$is_valid) { http_response_code(400); echo $response_text;}
+    if (!$is_valid) { http_response_code(400); echo $response_text;}
     return $is_valid;
         
 }
 
 $post_data = file_get_contents("php://input");
 $data = json_decode($post_data,true);
-/*
 if (!validate_json($data)) {
     exit(1);
-}*/
+}
 $title = $data["title"];
 if (!file_exists($title)){
     mkdir($title, 0777, true);

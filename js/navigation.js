@@ -77,6 +77,7 @@ function questionTypeChanged(){
 }
 
 function updatePage(data) {
+    if 
     console.log(data);
     var element = $('#download-info');
     element.append(data);
@@ -95,5 +96,5 @@ function makeRequest() {
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
         handler = updatePage;
-    $.post(url, jsonData, handler);
+    $.post(url, jsonData, handler).fail(function(data) {alert(data);});
 }
