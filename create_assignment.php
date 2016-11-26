@@ -117,10 +117,14 @@ function copy_supporting_files($number_of_questions){
 function create_zip($title, $number_of_questions){
     $zip = new ZipArchive();
     $filename = $title.".zip";
+    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html");
+    for ($i = 1; $i < $number_of_questions; $i++) {
+        $supporting_files[] = "question$i.html";
+    }
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
     }
-    foreach (glob("*.*") as $file){
+    foreach ($supporting_files as $file){
         $zip->addFile($file, "$file");
     }
     $zip->close();
@@ -139,13 +143,17 @@ function validate_json($json){
         $response_text = '<p class="invalid">Must supply title</p>';
         $is_valid = false;
     }
+    elseif (!preg_match("^[a-zA-Z]"), $title) {
+        $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
+        $is_valid = false;
+    }   
     elseif (!(isset($json["questions"]) && count($json["questions"]))) {
         $response_text = '<p class="invalid">Must supply questions</p>';
         $is_valid = false;
     }
     foreach ($json["questions"] as $q){
         if (!isset($q["title"]) || !isset($q["text"]) || !isset($q["answer"]) || !isset($q["hint"])){
-            $response_text = '<p class="invalid">Question specification invalid for question with title '.$q["title"].'</p>';
+            $response_text = '<p class="invalid">Question specification invalid for question with title '.htmlspecialchars($q["title"]).'</p>';
             $is_valid = false;
         }
         else if ($q["type"] == "multiple-choice" && !count($q["prompts"]) == 0){
@@ -164,6 +172,7 @@ if (!validate_json($data)) {
     exit(1);
 }
 $title = $data["title"];
+
 if (!file_exists($title)){
     mkdir($title, 0777, true);
 }
@@ -186,8 +195,3 @@ if (file_exists($output)) {
 else {
     echo 'derp--created file not found';
 }
-
-/*
-
-*/
-?>
