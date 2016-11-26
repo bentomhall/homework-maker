@@ -128,9 +128,13 @@ function create_zip($title, $number_of_questions){
     }
     foreach ($supporting_files as $file){
         $zip->addFile($file, "$file");
+        unlink($file);
+        
     }
     $zip->close();
     copy($filename, DOCUMENT_ROOT."/$filename");
+    unlink($filename);
+    
     return $filename;
 }
 
