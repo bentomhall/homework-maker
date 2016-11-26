@@ -21,7 +21,7 @@ class Template {
 
         foreach ($this->values as $key => $value) {
             $tagToReplace = "[@$key]";
-            $output = str_replace($tagToReplace, $value, $output);
+            $output = str_replace($tagToReplace, sanitize($value), $output);
         }
         return $output;
     }
@@ -37,6 +37,15 @@ class Template {
     }
  
     return $output;
+    }
+    
+    protected function sanitize($data){
+        $sanitized = htmlspecialchars($data, ENT_QUOTES|ENT_HTML5);
+        $allowed = ['&gt;sup&lt;' => '<sup>', '&gt;/sup&lt;' => '</sup>', '&gt;sub&lt;' => '<sub>', '&gt;/sub&lt;' => '</sub>'];
+        foreach($allowed as $key => $value) {
+            $sanitized = str_replace($key, $value, $sanitized);
+        }
+        return $sanitized
     }
 }
 
