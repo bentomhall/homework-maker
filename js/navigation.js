@@ -78,9 +78,11 @@ function createFromJson () {
         alert('Must supply valid JSON');
         return false;
     }
+    else {
     var url = 'create_assignment.php',
         handler = updatePage;
-    $.post(url, data, handler).fail(function(data) {alert(data);});
+    $.post(url, data, handler).fail(function(data) {onFailure(data);});
+    }
 }
 
 function questionTypeChanged(){
@@ -95,6 +97,13 @@ function updatePage(data) {
     element.show(); 
 }
 
+function onFailure(data) {
+    var element = $('#download-info');
+    element.append("<h1>FAILED</h1>");
+    element.append(data);
+    element.show();
+}
+
 function makeRequest() {
     addTitle();
     if (document.assignment === undefined) {
@@ -107,5 +116,5 @@ function makeRequest() {
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
         handler = updatePage;
-    $.post(url, jsonData, handler).fail(function(data) {alert(data);});
+    $.post(url, jsonData, handler).fail(function(data) {onFailure(data);});
 }

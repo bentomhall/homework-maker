@@ -139,12 +139,12 @@ function validate_json($json){
             $response_text = '<p class="invalid">Question specification invalid for question with title '.$q["title"].'</p>';
             $is_valid = false;
         }
-        else if ($q["type"] == "multiple-choice" && !count($q["prompts"]) == 0){
-            $response_text = '<p class="invalid">Multiple choice questions must have at least one prompt</p>';
+        else if ($q["type"] == "multiple-choice" && count($q["prompts"]) == 0){
+            $response_text = '<p class="invalid">Multiple choice question titled "'.$q['title']. '" must have at least one prompt</p>';
             $is_valid = false;
         }
     }
-    if (!$is_valid) { http_response_code(400); echo $response_text;}
+    if (!$is_valid) { /*http_response_code(400);*/ echo $response_text;}
     return $is_valid;
         
 }
