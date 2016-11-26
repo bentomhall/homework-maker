@@ -115,7 +115,8 @@ function create_zip($title, $number_of_questions){
         $zip->addFile($file, "$file");
     }
     $zip->close();
-    return realpath("./".$filename);
+    copy($filename, DOCUMENT_ROOT."/$filename");
+    return $filename;
 }
 
 function has_value_for_key($array, $key){
@@ -123,31 +124,37 @@ function has_value_for_key($array, $key){
 }
 
 function validate_json($json){
-    if (!isset($json["title"]) ||
-        !(isset($json["questions"]) && count($json["questions"]))) {
-        echo '<p class="invalid">Must supply both title and questions</p>';
-        return false;
+    $is_valid = true;
+    $response_text = "";
+    if (!isset($json['title'])) {
+        $response_text = '<p class="invalid">Must supply title</p>';
+        $is_valid = false;
+    }
+    elseif (!(isset($json["questions"]) && count($json["questions"]))) {
+        $response_text = '<p class="invalid">Must supply questions</p>';
+        $is_valid = false;
     }
     foreach ($json["questions"] as $q){
         if (!isset($q["title"]) || !isset($q["text"]) || !isset($q["answer"]) || !isset($q["hint"])){
-            echo '<p class="invalid">Question specification invalid for question with title '.$q["title"].'</p>';
-            return false;
+            $response_text = '<p class="invalid">Question specification invalid for question with title '.$q["title"].'</p>';
+            $is_valid = false;
         }
         else if ($q["type"] == "multiple-choice" && !count($q["prompts"]) == 0){
-            echo '<p class="invalid">Multiple choice questions must have at least one prompt</p>';
-            return false;
+            $response_text = '<p class="invalid">Multiple choice questions must have at least one prompt</p>';
+            $is_valid = false;
         }
     }
-    return true;
+    //if (!$is_valid) { http_response_code(400); echo $response_text;}
+    return $is_valid;
         
 }
 
 $post_data = file_get_contents("php://input");
 $data = json_decode($post_data,true);
+/*
 if (!validate_json($data)) {
-    http_response_code(400); 
     exit(1);
-}
+}*/
 $title = $data["title"];
 if (!file_exists($title)){
     mkdir($title, 0777, true);
@@ -164,19 +171,15 @@ build_index($title, $titles);
 copy_supporting_files($i);
 $output = create_zip($title, $i);
 if (file_exists($output)) {
-    header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachement; filename="'.basename($output).'"');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: '.filesize($output));
-    readfile($output);
+    $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
+    $downloadTemplate->set("url", $output);
+    echo $downloadTemplate->output();
+}
+else {
+    echo 'derp--created file not found';
 }
 
 /*
-$downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
-$downloadTemplate->set("url", $output);
-echo $downloadTemplate->output();
+
 */
 ?>

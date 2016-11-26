@@ -80,7 +80,7 @@ function updatePage(data) {
     console.log(data);
     var element = $('#download-info');
     element.append(data);
-    element.show();
+    element.show(); 
 }
 
 function makeRequest() {
