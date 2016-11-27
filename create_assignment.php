@@ -149,7 +149,7 @@ function validate_json($json){
         $response_text = '<p class="invalid">Must supply title</p>';
         $is_valid = false;
     }
-    elseif (!preg_match("^[a-zA-Z]"), $title) {
+    elseif (!preg_match("^[a-zA-Z]*"), $title) {
         $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
         $is_valid = false;
     }   
