@@ -21,7 +21,7 @@ class Template {
 
         foreach ($this->values as $key => $value) {
             $tagToReplace = "[@$key]";
-            $output = str_replace($tagToReplace, $value, $output);
+            $output = str_replace($tagToReplace, sanitize($value), $output);
         }
         return $output;
     }
@@ -37,6 +37,15 @@ class Template {
     }
  
     return $output;
+    }
+    
+    protected function sanitize($data){
+        $sanitized = htmlspecialchars($data, ENT_QUOTES|ENT_HTML5);
+        $allowed = ['&gt;sup&lt;' => '<sup>', '&gt;/sup&lt;' => '</sup>', '&gt;sub&lt;' => '<sub>', '&gt;/sub&lt;' => '</sub>'];
+        foreach($allowed as $key => $value) {
+            $sanitized = str_replace($key, $value, $sanitized);
+        }
+        return $sanitized
     }
 }
 
@@ -107,15 +116,25 @@ function copy_supporting_files($number_of_questions){
 
 function create_zip($title, $number_of_questions){
     $zip = new ZipArchive();
+    $filename = $title.".zip";
+    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html");
+    for ($i = 1; $i < $number_of_questions; $i++) {
+        $supporting_files[] = "question$i.html";
+    }
     $filename = urlencode($title).".zip";
+
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
     }
-    foreach (glob("*.*") as $file){
+    foreach ($supporting_files as $file){
         $zip->addFile($file, "$file");
+        unlink($file);
+        
     }
     $zip->close();
     copy($filename, DOCUMENT_ROOT."/$filename");
+    unlink($filename);
+    
     return $filename;
 }
 
@@ -130,13 +149,17 @@ function validate_json($json){
         $response_text = '<p class="invalid">Must supply title</p>';
         $is_valid = false;
     }
+    elseif (!preg_match("^[a-zA-Z]"), $title) {
+        $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
+        $is_valid = false;
+    }   
     elseif (!(isset($json["questions"]) && count($json["questions"]))) {
         $response_text = '<p class="invalid">Must supply questions</p>';
         $is_valid = false;
     }
     foreach ($json["questions"] as $q){
         if (!isset($q["title"]) || !isset($q["text"]) || !isset($q["answer"]) || !isset($q["hint"])){
-            $response_text = '<p class="invalid">Question specification invalid for question with title '.$q["title"].'</p>';
+            $response_text = '<p class="invalid">Question specification invalid for question with title '.htmlspecialchars($q["title"]).'</p>';
             $is_valid = false;
         }
         else if ($q["type"] == "multiple-choice" && count($q["prompts"]) == 0){
@@ -155,6 +178,7 @@ if (!validate_json($data)) {
     exit(1);
 }
 $title = $data["title"];
+
 if (!file_exists($title)){
     mkdir($title, 0777, true);
 }
@@ -177,4 +201,3 @@ if (file_exists($output)) {
 else {
     echo 'derp--created file not found';
 }
-?>
