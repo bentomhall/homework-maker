@@ -18,10 +18,15 @@ class Template {
             return "Error Loading File ($this->file).";
         }
         $output = file_get_contents($this->file);
-
         foreach ($this->values as $key => $value) {
             $tagToReplace = "[@$key]";
-            $output = str_replace($tagToReplace, sanitize($value), $output);
+            if ($tagToReplace == "[@prompts]" || $tagToReplace == "[@questions]") {
+                //these components are built out of already sanitized values but contain raw html themselves that should not be escaped.
+                $output = str_replace($tagToReplace, $value, $output);
+            } 
+            else {
+                $output = str_replace($tagToReplace, sanitize($value), $output);
+            }
         }
         return $output;
     }
@@ -39,15 +44,22 @@ class Template {
     return $output;
     }
     
-    protected function sanitize($data){
+
+}
+
+function sanitize($data){
         $sanitized = htmlspecialchars($data, ENT_QUOTES|ENT_HTML5);
-        $allowed = ['&gt;sup&lt;' => '<sup>', '&gt;/sup&lt;' => '</sup>', '&gt;sub&lt;' => '<sub>', '&gt;/sub&lt;' => '</sub>'];
-        foreach($allowed as $key => $value) {
-            $sanitized = str_replace($key, $value, $sanitized);
-        }
+        $patterns = ['/\^(w+)\^/',
+                     '/_(w+)_/',
+                     '/\[LIST\](.*)\[\/LIST\]/'];
+        $replacements = ['<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>'];
+        $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
+        $inner_replacement = '<li>${1}</li>';
+        //do <li> replacement first, then match outer pattern
+        $sanitized = preg_replace($inner_pattern, $inner_replacement, $sanitized);
+        $sanitized = preg_replace($patterns, $replacements, $sanitized);
         return $sanitized;
     }
-}
 
 function get_question_templates(Array $items){
     $i = 1;
@@ -116,25 +128,23 @@ function copy_supporting_files($number_of_questions){
 
 function create_zip($title, $number_of_questions){
     $zip = new ZipArchive();
-    $filename = $title.".zip";
     $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html");
     for ($i = 1; $i < $number_of_questions; $i++) {
         $supporting_files[] = "question$i.html";
     }
-    $filename = urlencode($title).".zip";
+    $filename = $title.".zip";
 
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
     }
     foreach ($supporting_files as $file){
         $zip->addFile($file, "$file");
-        unlink($file);
-        
     }
     $zip->close();
     copy($filename, DOCUMENT_ROOT."/$filename");
-    unlink($filename);
-    
+    foreach ($supporting_files as $file) {
+        unlink($file);
+    }
     return $filename;
 }
 
@@ -149,7 +159,7 @@ function validate_json($json){
         $response_text = '<p class="invalid">Must supply title</p>';
         $is_valid = false;
     }
-    elseif (!preg_match('/^[a-zA-Z]+$/', $title)) {
+    elseif (!preg_match('/^[a-zA-Z].* /', $json['title'])) {
         $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
         $is_valid = false;
     }   
@@ -178,11 +188,11 @@ if (!validate_json($data)) {
     exit(1);
 }
 $title = $data["title"];
-
-if (!file_exists($title)){
-    mkdir($title, 0777, true);
+$escaped_title = urlencode($title);
+if (!file_exists($escaped_title)){
+    mkdir($escaped_title, 0777, true);
 }
-chdir($title);
+chdir($escaped_title);
 $titles = Array();
 $i = 1;
 foreach ($data["questions"] as $qdata){
@@ -192,7 +202,8 @@ foreach ($data["questions"] as $qdata){
 }
 build_index($title, $titles);
 copy_supporting_files($i);
-$output = create_zip($title, $i);
+$output = create_zip($escaped_title, $i);
+error_log("trying to serve file $output");
 if (file_exists($output)) {
     $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
     $downloadTemplate->set("url", $output);
