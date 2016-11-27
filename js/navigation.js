@@ -14,11 +14,11 @@ function addTitle() {
 }
 
 function storeAssigment(){
-    localStorage.assigment = JSON.stringify(document.assignment);
+    localStorage.assignment = JSON.stringify(document.assignment);
 }
 
 function clearAssignment(){
-    localStorage.assigment = null;
+    localStorage.assignment = null;
     clearQuestion();
 }
 
