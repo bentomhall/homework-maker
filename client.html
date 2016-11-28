@@ -32,8 +32,9 @@
     <script src="js/navigation.js"></script>
     <div class="container">
         <div class="row">
-            <div class="col-md-12"><h1 class="text-center">Homework Maker</h1></div>
-            <div class="panel-group">
+            <div class="col-md-12 well"><h1 class="text-center">Homework Maker</h1></div>
+            <div class="panel-group well">
+            <div class="panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <h2 data-target="#instructions" data-toggle="collapse">
@@ -53,7 +54,7 @@
                     Once you have added the questions, click the "Create Assignment Button" to create the assignment. A box will pop up with a link to download it. You will also get a bunch of text in a box below this. If you want to recreate the assignment later without retyping everything, copy and paste this text to a file. When you want to recreate the assignment, copy and paste the text from the file back into this box and hit "Create from direct input."
                 </div>
             </div>
-            <div class="panel-group">
+            <div class="panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <h2 data-target="#mathjax-instructions" data-toggle="collapse">
@@ -65,22 +66,20 @@
                     Questions involving mathematics or equations can be written using mathjax (which will make the equations look fancy). To indicate an equation, type the equation between backticks (&#96;). For exponents or superscripts, use ^, for subscripts use _. Set off denominators with parentheses.
                 </div>
             </div>
+            </div>
         </div>
-        <div class="row">
-            <div class="col-md-10">
+        <div class="row well">
+            <div class="col-md-8">
                 <div class="form-group">
                     <label>Assignment Title:</label>
                     <input class="form-control" type="text" id="assignment-title"/>
+                    <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
+                    <button id="create-from-json" onclick="createFromJson();">Create from Direct Input</button>
                 </div>
             </div>
-            <div class="col-md-2">
-                <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
-                <button id="create-from-json" onclick="createFromJson();">Create from Direct Input</button>
-            </div>
-            
         </div>
         <div class="row">
-            <div class="col-md-8"><!--question form here-->
+            <div class="col-md-8 well"><!--question form here-->
             <form id='question-details' onsubmit="return false;">
                 <div class="form-group">
                     <label for="question-title">Question Title</label>
@@ -122,19 +121,24 @@
             </form>
             
             </div>
-            <div class="col-md-4"><!--current saved questions -->
-                <table class="question-output">
-                    <thead class="question-header">
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">Title</th>
-                            <th class="text-center">Type</th>
-                        </tr>
-                    </thead>
-                    <tbody id="current-questions">
-                    </tbody>
+            <div class="col-md-4 panel-group"><!--current saved questions -->
+                <div class="panel well">
+                    <div class="panel-header">
+                        <h4 class="text-center panel-title">Saved Questions</h4>
+                    </div>
+                    <table class="question-output panel-body">
+                        <thead class="question-header">
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th class="text-center">Title</th>
+                                <th class="text-center">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="current-questions">
+                        </tbody>
                 </table>
-                <div class="panel panel-default">
+                </div>
+                <div class="panel panel-default well">
                     <div class="panel-header">
                         <h4 class="panel-title">
                             <a href="#download-info" data-toggle="collapse">Download information</a>
@@ -142,7 +146,7 @@
                         </div>
                     <div id="download-info" class="panel-body collapse"></div>
                 </div>
-                <div class="panel panel-info">
+                <div class="panel panel-info well">
                     <div class="panel-header">
                         <h4 class="panel-title">
                             <a href="#output-json" data-toggle="collapse">
