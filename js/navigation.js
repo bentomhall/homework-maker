@@ -1,12 +1,7 @@
 $(document.body).ready(function(){
-    var storedAssignment = localStorage['assignment'];
-    if (!storedAssignment){
-        document.assignment = {};
-        document.assignment.questions = [];
-    }
-    else {
-        document.assignment = JSON.parse(storedAssignment);
-    }
+    localStorage['assignment'] = null;
+    document.assignment = {};
+    document.assignment.questions = [];
 });
 function addTitle() {
     document.assignment['title'] = $('#assignment-title').val();
@@ -91,16 +86,17 @@ function questionTypeChanged(){
 }
 
 function updatePage(data) {
-    console.log(data);
-    var element = $('#download-info');
-    element.append(data);
-    element.show(); 
+    var parent = $('#download-info'),
+        child = $('#download-info .panel-body');
+    parent.class += 'panel-success';
+    child.html(data);
+    parent.show(); 
 }
 
 function onFailure(data) {
     var element = $('#download-info');
-    element.append("<h1>FAILED</h1>");
-    element.append(data);
+    element.class += 'panel-failure';
+    element.html("<h4>FAILED</h4>"+data["responseText"]);
     element.show();
 }
 
@@ -116,5 +112,5 @@ function makeRequest() {
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
         handler = updatePage;
-    $.post(url, jsonData, handler).fail(function(data) {onFailure(data);});
+    $.post(url, jsonData, handler).fail(function(data) {console.log(data); onFailure(data);});
 }

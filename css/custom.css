@@ -9,11 +9,18 @@
     border-collapse: collapse;
 }
 
-
 .question-header th {
     font-weight: bold;
     border: 1px solid black;
     border-collapse: collapse;
+}
+
+tbody {
+    border: 1px solid black;
+}
+
+.invalid {
+    color: red;
 }
 
 .prompts {

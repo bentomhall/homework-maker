@@ -160,7 +160,8 @@ function validate_json($json){
         $response_text = '<p class="invalid">Must supply title</p>';
         $is_valid = false;
     }
-    elseif (!preg_match('/^[a-zA-Z].* /', $json['title'])) {
+    elseif (!preg_match('/^[A-Za-z].*/', $json['title'])) {
+        error_log($json['title']);
         $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
         $is_valid = false;
     }   
@@ -178,7 +179,10 @@ function validate_json($json){
             $is_valid = false;
         }
     }
-    if (!$is_valid) { /*http_response_code(400);*/ echo $response_text;}
+    if (!$is_valid) { 
+         header('X-PHP-RESPONSE-CODE: 400', true, 400);
+         echo $response_text;
+    }
     return $is_valid;
         
 }
