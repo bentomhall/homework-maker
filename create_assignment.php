@@ -132,7 +132,7 @@ function create_zip($title, $number_of_questions){
     for ($i = 1; $i < $number_of_questions; $i++) {
         $supporting_files[] = "question$i.html";
     }
-    $filename = $title.".zip";
+    $filename = preg_replace('/tmp$/', '', $title).".zip";
 
     if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
         exit("cannot open <$filename>\n");
@@ -141,11 +141,12 @@ function create_zip($title, $number_of_questions){
         $zip->addFile($file, "$file");
     }
     $zip->close();
-    copy($filename, DOCUMENT_ROOT."/$filename");
+    copy($filename, DOCUMENT_ROOT."/downloads/$filename");
     foreach ($supporting_files as $file) {
         unlink($file);
     }
-    return $filename;
+    unlink($filename);
+    return basename($filename);
 }
 
 function has_value_for_key($array, $key){
@@ -188,9 +189,9 @@ if (!validate_json($data)) {
     exit(1);
 }
 $title = $data["title"];
-$escaped_title = urlencode($title);
+$escaped_title = str_replace(' ', '', $title)."tmp"; //stupid spaces
 if (!file_exists($escaped_title)){
-    mkdir($escaped_title, 0777, true);
+    mkdir($escaped_title, 0744, true);
 }
 chdir($escaped_title);
 $titles = Array();
@@ -203,12 +204,6 @@ foreach ($data["questions"] as $qdata){
 build_index($title, $titles);
 copy_supporting_files($i);
 $output = create_zip($escaped_title, $i);
-error_log("trying to serve file $output");
-if (file_exists($output)) {
-    $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
-    $downloadTemplate->set("url", $output);
-    echo $downloadTemplate->output();
-}
-else {
-    echo 'derp--created file not found';
-}
+$downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
+$downloadTemplate->set("url", "downloads/download.php?name=$output");
+echo $downloadTemplate->output();
