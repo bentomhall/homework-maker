@@ -36,6 +36,10 @@
     height: 12em;
 }
 
+.panel, table {
+    margin-bottom: 10px;
+}
+
 .visible {
     display: block;
 }
