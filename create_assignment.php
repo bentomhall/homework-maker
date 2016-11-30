@@ -48,11 +48,11 @@ class Template {
 }
 
 function sanitize($data){
-        $sanitized = htmlspecialchars($data, ENT_QUOTES|ENT_HTML5);
-        $patterns = ['/\^(w+)\^/',
+        $sanitized = htmlspecialchars($data, ENT_QUOTES);
+        $patterns = Array('/\^(w+)\^/',
                      '/_(w+)_/',
-                     '/\[LIST\](.*)\[\/LIST\]/'];
-        $replacements = ['<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>'];
+                     '/\[LIST\](.*)\[\/LIST\]/');
+        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>');
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
