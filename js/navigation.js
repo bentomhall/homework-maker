@@ -3,21 +3,16 @@ $(document.body).ready(function(){
     document.assignment = {};
     document.assignment.questions = [];
     sessionStorage.setItem('isEditing', false);
-    $("#add-question-button").on('click', addQuestion);
-    $("#clear-question-button").on('click', clearQuestion);
-    $("#questions-table tr").on('click', function() {
-        $(this).addClass('selected').siblings.removeClass('selected');
-        if (sessionStorage.getItem('isEditing')) {
-            fillDialog($(".selected").rowIndex);
-        }
-    });
+    $("#add-question-button").on('click', function(event) {
+        addQuestion(); });
+    $("#clear-question-button").click(function(event) {clearQuestion()});
     $("#delete-question-button").on('click', deleteQuestion);
-    $("$toggle-editing-button").on('click', toggleEditingMode);
+    $("#toggle-editing-button").on('click', toggleEditingMode);
 });
 
 function toggleEditingMode() {
     var mode = sessionStorage.getItem('isEditing');
-    if (mode) { 
+    if (mode === "true") { 
         sessionStorage.setItem('isEditing', false);
         $("#add-question-button").on('click', addQuestion).html('Add Question');
     }
@@ -31,6 +26,7 @@ function fillDialog(index){
     var assignment = JSON.parse(localStorage.getItem("assignment")),
     question = assignment.questions[index],
     prompts;
+    console.log(index);
     $("#question-title").val(question['title']);
     $("#question-text").val(question['text']);
     $("#question-answer").val(question['answer']);
@@ -47,7 +43,7 @@ function fillDialog(index){
 
 function deleteQuestion() {
     var assignment = JSON.parse(localStorage.getItem('assignment')),
-        index = $('tr.selected').rowIndex;
+        index = $('tr.selected').index();
     assignment.questions.splice(index, 1);
     document.assignment = assignment;
     $(`#question${index}`).remove();
@@ -55,7 +51,7 @@ function deleteQuestion() {
 }
 
 function editQuestion() {
-    var index = $('tr.selected').rowIndex;
+    var index = $('tr.selected').index();
     addQuestion(index);
 }
 
@@ -95,6 +91,12 @@ function generateTableRow(question, index){
 
 function updateQuestionDisplay(q, index){
     $('#current-questions').append(generateTableRow(q, index));
+    $("#current-questions tr").click( function(event) {
+        $(this).addClass('selected').siblings().removeClass('selected');
+        if (sessionStorage.getItem('isEditing') === "true") {
+            fillDialog($("tr.selected").index());
+        }
+    });
 }
 
 function addQuestion(index) {
@@ -102,6 +104,9 @@ function addQuestion(index) {
         prompts,
         question = {},
         questionType = $('#question-type').val();
+        id = 'tr#question' + index ? Number(index) : null,
+        index = index === 0 ? index : (index || -1);
+    console.log(index);
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
@@ -115,10 +120,10 @@ function addQuestion(index) {
         });
         question['prompts'] = prompts;
     }
-    if (index){
+    if (index !== -1){
         document.assignment.questions[index] = question;
-        $(`tr#question${index} td.qtitle`).val(question['title']);
-        $(`tr#question${index} td.qtype`).val(question['type']);
+        $(id +' td.qtitle').val(question['title']);
+        $(id +' td.qtype').val(question['type']);
     }
     else {
         numberOfQuestions = document.assignment['questions'].push(question);
