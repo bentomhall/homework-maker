@@ -48,3 +48,7 @@ tbody {
     display: block;
 }
 
+tr.selected {
+    background-color: blue;
+}
+

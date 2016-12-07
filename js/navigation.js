@@ -2,7 +2,63 @@ $(document.body).ready(function(){
     localStorage['assignment'] = null;
     document.assignment = {};
     document.assignment.questions = [];
+    sessionStorage.setItem('isEditing', false);
+    $("#add-question-button").on('click', addQuestion);
+    $("#clear-question-button").on('click', clearQuestion);
+    $("#questions-table tr").on('click', function() {
+        $(this).addClass('selected').siblings.removeClass('selected');
+        if (sessionStorage.getItem('isEditing')) {
+            fillDialog($(".selected").rowIndex);
+        }
+    });
+    $("#delete-question-button").on('click', deleteQuestion);
+    $("$toggle-editing-button").on('click', toggleEditingMode);
 });
+
+function toggleEditingMode() {
+    var mode = sessionStorage.getItem('isEditing');
+    if (mode) { 
+        sessionStorage.setItem('isEditing', false);
+        $("#add-question-button").on('click', addQuestion).html('Add Question');
+    }
+    else {
+        sessionStorage.setItem('isEditing', true);
+        $("#add-question-button").on('click', editQuestion).html('Save Question');
+    }
+}
+
+function fillDialog(index){
+    var assignment = JSON.parse(localStorage.getItem("assignment")),
+    question = assignment.questions[index],
+    prompts;
+    $("#question-title").val(question['title']);
+    $("#question-text").val(question['text']);
+    $("#question-answer").val(question['answer']);
+    $("#question-hint").val(question['hint']);
+    $("#question-type").val(question['type']);
+    if (question['type'] === 'multiple-choice') {
+        prompts = question['prompts'];
+        $('li input').forEach(function(e, index) {
+            e.val(prompts[index]);
+        })
+    }
+    
+}
+
+function deleteQuestion() {
+    var assignment = JSON.parse(localStorage.getItem('assignment')),
+        index = $('tr.selected').rowIndex;
+    assignment.questions.splice(index, 1);
+    document.assignment = assignment;
+    $(`#question${index}`).remove();
+    storeAssigment();
+}
+
+function editQuestion() {
+    var index = $('tr.selected').rowIndex;
+    addQuestion(index);
+}
+
 function addTitle() {
     document.assignment['title'] = $('#assignment-title').val();
     storeAssigment();
@@ -18,29 +74,30 @@ function clearAssignment(){
 }
 
 function clearQuestion(){
-    var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
-        prompts = $('li input');
-    elements.forEach(function(e) {
+        var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
+            prompts = $('li input');
+        elements.forEach(function(e) {
         if (e !== '#question-type') {
             $(e).val('');
         }
         else {
             $(e).val('exact-case');
         }
-    });
-    prompts.val('');
-    questionTypeChanged();
+        });
+        prompts.val('');
+        questionTypeChanged();
+    
 }
 
 function generateTableRow(question, index){
-    return `<tr><td>${index}</td><td>${question.title}</td><td>${question.type}</td></tr>`
+    return `<tr id="question${index}"><td>${index}</td><td class="qtitle">${question.title}</td><td class='qtype'>${question.type}</td></tr>`
 }
 
 function updateQuestionDisplay(q, index){
     $('#current-questions').append(generateTableRow(q, index));
 }
 
-function addQuestion() {
+function addQuestion(index) {
     var numberOfQuestions,
         prompts,
         question = {},
@@ -58,11 +115,17 @@ function addQuestion() {
         });
         question['prompts'] = prompts;
     }
-    numberOfQuestions = document.assignment['questions'].push(question);
-    updateQuestionDisplay(question, numberOfQuestions);
+    if (index){
+        document.assignment.questions[index] = question;
+        $(`tr#question${index} td.qtitle`).val(question['title']);
+        $(`tr#question${index} td.qtype`).val(question['type']);
+    }
+    else {
+        numberOfQuestions = document.assignment['questions'].push(question);
+        updateQuestionDisplay(question, numberOfQuestions);
+    }
     storeAssigment();
     clearQuestion();
-    console.log(document.assignment);
     return false;
 }
 
@@ -98,6 +161,10 @@ function onFailure(data) {
     element.class += 'panel-failure';
     element.html("<h4>FAILED</h4>"+data["responseText"]);
     element.show();
+}
+
+function onOrderChange() {
+
 }
 
 function makeRequest() {
