@@ -48,8 +48,18 @@ function deleteQuestion() {
         index = $('tr.selected').index();
     assignment.questions.splice(index, 1);
     document.assignment = assignment;
-    $(`#question${index}`).remove();
+    $('tr.selected').remove();
+    renumberTableRows(index);
     storeAssigment();
+}
+
+function renumberTableRows(startingIndex) {
+    $('#current-questions td:first-child').each(function(){
+        var thisIndex = Number($(this).html());
+        if (thisIndex > startingIndex + 1) {
+            $(this).html(thisIndex - 1);
+        }
+    })
 }
 
 function editQuestion() {
