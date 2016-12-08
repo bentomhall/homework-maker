@@ -12,6 +12,7 @@ $(document.body).ready(function(){
 
 function toggleEditingMode() {
     var mode = sessionStorage.getItem('isEditing');
+    $("#add-question-button").off('click');
     if (mode === "true") { 
         sessionStorage.setItem('isEditing', false);
         $("#add-question-button").on('click', addQuestion).html('Add Question');
@@ -103,10 +104,9 @@ function addQuestion(index) {
     var numberOfQuestions,
         prompts,
         question = {},
-        questionType = $('#question-type').val();
-        id = 'tr#question' + index ? Number(index) : null,
-        index = index === 0 ? index : (index || -1);
-    console.log(index);
+        questionType = $('#question-type').val(),
+        index = index === 0 ? index : (index || -1),
+        id = (index > -1? 'tr#question' + (index + 1) : null);
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
@@ -122,8 +122,8 @@ function addQuestion(index) {
     }
     if (index !== -1){
         document.assignment.questions[index] = question;
-        $(id +' td.qtitle').val(question['title']);
-        $(id +' td.qtype').val(question['type']);
+        $(id +' td.qtitle').html(question['title']);
+        $(id +' td.qtype').html(question['type']);
     }
     else {
         numberOfQuestions = document.assignment['questions'].push(question);
