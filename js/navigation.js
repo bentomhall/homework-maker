@@ -21,6 +21,7 @@ function toggleEditingMode() {
         sessionStorage.setItem('isEditing', true);
         $("#add-question-button").on('click', editQuestion).html('Save Question');
     }
+    $("#toggle-editing-button").toggleClass('on');
 }
 
 function fillDialog(index){
