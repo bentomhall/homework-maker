@@ -4,7 +4,7 @@ $(document.body).ready(function(){
     document.assignment.questions = [];
     sessionStorage.setItem('isEditing', false);
     $("#add-question-button").on('click', function(event) {
-        addQuestion(); });
+        editQuestion(); });
     $("#clear-question-button").click(function(event) {clearQuestion()});
     $("#delete-question-button").on('click', deleteQuestion);
     $("#toggle-editing-button").on('click', toggleEditingMode);
@@ -12,14 +12,13 @@ $(document.body).ready(function(){
 
 function toggleEditingMode() {
     var mode = sessionStorage.getItem('isEditing');
-    $("#add-question-button").off('click');
     if (mode === "true") { 
         sessionStorage.setItem('isEditing', false);
-        $("#add-question-button").on('click', addQuestion).html('Add Question');
+        $("#add-question-button").html('Add Question');
     }
     else {
         sessionStorage.setItem('isEditing', true);
-        $("#add-question-button").on('click', editQuestion).html('Save Question');
+        $("#add-question-button").html('Save Question');
     }
     $("#toggle-editing-button").toggleClass('on');
 }
@@ -63,8 +62,14 @@ function renumberTableRows(startingIndex) {
 }
 
 function editQuestion() {
-    var index = $('tr.selected').index();
-    addQuestion(index);
+    if (sessionStorage.getItem('isEditing') === 'true') {
+        var index = $('tr.selected').index();
+        addQuestion(index);
+    }
+    else {
+        addQuestion(-1);
+    }
+    
 }
 
 function addTitle() {
