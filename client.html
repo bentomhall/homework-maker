@@ -68,6 +68,7 @@
                     <h3>Other formatting options</h3>
                     <p><b>Lists:</b> You can make lists by starting the list with [LIST] and ending with [/LIST]. Each separate item in the list should start with [*] and end with [/*] (including the brackets).</p>
                     <p><b>Subscript and Superscript:</b> Subscript can be done either with mathjax (above) or by surrounding the subscript with underscores (_). Superscripts are the same, but use carets (^). None of these marks will show up in the assignments--the text will be properly typeset.
+                    <p><b>Images:</b> You can add images to questions in PNG or JPG format. Use the image file picker to select the images. In the question text where you want the image to appear, use the following syntax: [IMG]YOUR_IMAGE_NAME.jpg[/IMG]. The name of the image must match the file name exactly, including extension. Make sure not to use too large of images.
                 </div>
             </div>
             </div>
@@ -77,6 +78,8 @@
                 <div class="form-group">
                     <label>Assignment Title:</label>
                     <input class="form-control" type="text" id="assignment-title"/>
+                    <label for="image-upload">Images:</label>
+                    <input id="image-upload" type="file" multiple/>
                     <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
                     <button id="create-from-json" onclick="createFromJson();">Create from Direct Input</button>
                 </div>

@@ -51,8 +51,9 @@ function sanitize($data){
         $sanitized = htmlspecialchars($data, ENT_QUOTES);
         $patterns = Array('/\^(w+)\^/',
                      '/_(w+)_/',
-                     '/\[LIST\](.*)\[\/LIST\]/');
-        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>');
+                     '/\[LIST\](.*)\[\/LIST\]/',
+                     '/\[IMG\](.*)\[\/IMG\]/');
+        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>', '<img src="${1}" alt="${1}" width=300 />');
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
@@ -126,7 +127,7 @@ function copy_supporting_files($number_of_questions){
     update_js("validation.js", $number_of_questions);
 }
 
-function create_zip($title, $number_of_questions){
+function create_zip($title, $number_of_questions, $images){
     $zip = new ZipArchive();
     $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html");
     for ($i = 1; $i < $number_of_questions; $i++) {
@@ -139,6 +140,12 @@ function create_zip($title, $number_of_questions){
     }
     foreach ($supporting_files as $file){
         $zip->addFile($file, "$file");
+    }
+    if (count($images) > 0) {
+        foreach ($images as $image => $data){
+            $payload = explode(',', $data)[1];
+            $zip->addFromString("$image", base64_decode($payload));
+        }
     }
     $zip->close();
     copy($filename, DOCUMENT_ROOT."/downloads/$filename");
@@ -205,9 +212,11 @@ foreach ($data["questions"] as $qdata){
     $i += 1;
     $titles[] = $qdata["title"];
 }
+$images = $data['images'];
+error_log(base64_decode(explode(',', $images['solution1.png'])[1]));
 build_index($title, $titles);
 copy_supporting_files($i);
-$output = create_zip($escaped_title, $i);
+$output = create_zip($escaped_title, $i, $images);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
 echo $downloadTemplate->output();

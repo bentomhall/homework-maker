@@ -2,12 +2,14 @@ $(document.body).ready(function(){
     localStorage['assignment'] = null;
     document.assignment = {};
     document.assignment.questions = [];
+    window.images = {};
     sessionStorage.setItem('isEditing', false);
     $("#add-question-button").on('click', function(event) {
         editQuestion(); });
     $("#clear-question-button").click(function(event) {clearQuestion()});
     $("#delete-question-button").on('click', deleteQuestion);
     $("#toggle-editing-button").on('click', toggleEditingMode);
+    $("#image-upload").on('change', getImageData);
 });
 
 function toggleEditingMode() {
@@ -153,6 +155,7 @@ function addQuestion(index) {
 function createFromJson () {
     var data = $('#output-json').val(),
         json = JSON.parse(data);
+    json['images'] = [];
     if (json['title'] === undefined || json['questions'].length === 0) {
         alert('Must supply valid JSON');
         return false;
@@ -184,8 +187,32 @@ function onFailure(data) {
     element.show();
 }
 
-function onOrderChange() {
+function getImageData() {
+    function getPromise(file){
+        return new Promise(function(resolve, reject){
+            var reader = new FileReader();
+            reader.onload = function(evt){
+                window.images[file.name] = evt.target.result;
+                resolve();
+            };
+            reader.onerror = function(error) {
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
+    var uploadElement = $("#image-upload")[0].files,
+        promises = [];
+    for (var i=0; i < uploadElement.length; i++){
+        promises.push(getPromise(uploadElement[i]));
+    }
+    promises.reduce(function(cur, next){
+        return cur.then(next);
+    }, Promise.resolve()).then(function(){
+        return;
+    }
+    );
 }
 
 function makeRequest() {
@@ -196,6 +223,7 @@ function makeRequest() {
     if (document.assignment['title'] === undefined || document.assignment['questions'].length === 0){
         return false;
     }
+    document.assignment['images'] = window.images;
     $('#output-json').append(JSON.stringify(document.assignment));
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
