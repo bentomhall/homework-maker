@@ -213,10 +213,11 @@ foreach ($data["questions"] as $qdata){
     $titles[] = $qdata["title"];
 }
 $images = $data['images'];
-error_log(base64_decode(explode(',', $images['solution1.png'])[1]));
 build_index($title, $titles);
 copy_supporting_files($i);
 $output = create_zip($escaped_title, $i, $images);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
 echo $downloadTemplate->output();
+$date = date('M/d/Y h:i');
+file_put_contents('usage_log.log', "Processed $title on $date", FILE_APPEND);
