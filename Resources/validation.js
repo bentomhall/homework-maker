@@ -1,5 +1,6 @@
 var validator = {};
 
+var backingStore = sessionStorage;
 validator.validateExact = function (submitted, correct) {
     "use strict";
     return submitted.trim() === correct.trim();
@@ -12,22 +13,33 @@ validator.validateNumericWithin = function (submitted, correct, tolerance) {
         return Math.abs(submitted - correct) / correct <= tolerance;
     }
 };
+
+// these next two functions are credit @anotherusername on what.thedailywtf.com
+ 
 validator.validateTextContainsAny = function (submitted, requiredTerms) {
     "use strict";
-    var output = [],
-        input = submitted.split(', ');
-    input.forEach(function (x) {output.push(requiredTerms.indexOf(x)); });
-    return output.some(function (x) {return x !== -1; });
+    submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
+    requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
+    return requiredTerms.some(function (word) {
+        var i = -1;
+        for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
+        // for each match, check that the character before and after the match is a non-word character
+            if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
+    }
+  });
 };
 
 validator.validateTextContainsAll = function (submitted, requiredTerms) {
     "use strict";
-    var output = [],
-        input = requiredTerms.toLowerCase().split(', ');
-    input.forEach(function (x) {
-        output.push(submitted.toLowerCase().indexOf(x));
-        return output.every(function (x) { return x !== -1; });
-    });
+    submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
+    requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
+    return requiredTerms.every(function (word) {
+        var i = -1;
+        for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
+      // for each match, check that the character before and after the match is a non-word character
+            if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
+    }
+  });
 };
 
 validator.validateExactCaseInsensitive = function (submitted, correct) {
@@ -96,7 +108,7 @@ function validateAnswer(isMC) {
         isCorrect = validator.validateTextContainsAll(submitted, rightAnswer);
     }
     markAnswer(isCorrect);
-    sessionStorage.setItem(questionId, isCorrect);
+    backingStore.setItem(assignmentSeed + questionId, isCorrect);
 }
 
 function nextPage() {
@@ -130,7 +142,7 @@ function validateHomePageLinks() {
         validCount = 0;
     for (i; i <= activeQuestions; i += 1) {
         link = links[i - 1]; //0 indexed
-        isValid = sessionStorage.getItem(i); //1 indexed
+        isValid = backingStore.getItem(assignmentSeed + i); //1 indexed
         if (isValid === "true") {
             link.className = "question correct";
             validCount += 1;
@@ -145,11 +157,9 @@ function validateHomePageLinks() {
     }
 }
 
-
-
 function resetValidation(index) {
     "use strict";
-    sessionStorage.setItem(index, "unvalidated");
+    backingStore.setItem(index, "unvalidated");
 }
 
 function resetAllValidation() {

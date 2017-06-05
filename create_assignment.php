@@ -49,10 +49,12 @@ class Template {
 
 function sanitize($data){
         $sanitized = htmlspecialchars($data, ENT_QUOTES);
-        $patterns = Array('/\^(w+)\^/',
-                     '/_(w+)_/',
-                     '/\[LIST\](.*)\[\/LIST\]/');
-        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>');
+        $patterns = Array('/\^(.?)\^/',
+                     '/_(.?)_/',
+                     '/\[LIST\](.*)\[\/LIST\]/',
+                     '/\[B\](.*)\[\/B\]/',
+                     '/\[_]/');
+        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>', '<b>${1}</b>', '____________');
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
@@ -78,7 +80,7 @@ function build_prompts($data){
     $output = "";
     $i = 0;
     foreach ($data as $d){
-        $output .= '<input type="radio" name="answer-entry" value="'.$i.'"/>'.$d.'</br >';
+        $output .= '<input type="radio" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
         $i += 1;
     }
     return $output;
@@ -114,8 +116,27 @@ function build_question($question_data, $question_number){
 
 function update_js($file, $number_of_questions){
     $contents = "var activeQuestions = ".($number_of_questions-1).";\n";
+    $contents .= "var assignmentSeed = ".$getGUID().";\n";
     $contents .= file_get_contents($file);
     file_put_contents($file, $contents);
+}
+
+function getGUID(){
+    if (function_exists('com_create_guid')){
+        return com_create_guid();
+    }else{
+        mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+        $charid = strtoupper(bin2hex(openssl_random_pseudo_bytes(16)));
+        $hyphen = chr(45);// "-"
+        $uuid = chr(123)// "{"
+            .substr($charid, 0, 8).$hyphen
+            .substr($charid, 8, 4).$hyphen
+            .substr($charid,12, 4).$hyphen
+            .substr($charid,16, 4).$hyphen
+            .substr($charid,20,12)
+            .chr(125);// "}"
+        return $uuid;
+    }
 }
 
 function copy_supporting_files($number_of_questions){
