@@ -67,7 +67,8 @@
                     <p>Questions involving mathematics or equations can be written using mathjax (which will make the equations look fancy). To indicate an equation, type the equation between backticks (&#96; &#96;). For exponents or superscripts, use &#94;, for subscripts use &#95;. Set off denominators with parentheses. For example, &#96;a^2 + b^2 = c^2&#96; will show up as \[a^2 + b^2 = c^2\].</p>
                     <h3>Other formatting options</h3>
                     <p><b>Lists:</b> You can make lists by starting the list with [LIST] and ending with [/LIST]. Each separate item in the list should start with [*] and end with [/*] (including the brackets).</p>
-                    <p><b>Subscript and Superscript:</b> Subscript can be done either with mathjax (above) or by surrounding the subscript with [_] and [/_]. Superscripts are the same, but use [^] and [/^]. None of these marks will show up in the assignments--the text will be properly typeset.
+                    <p><b>Subscript and Superscript:</b> Subscript can be done either with mathjax (above) or by surrounding the subscript with underscores (_). Superscripts are the same, but use carets (^). None of these marks will show up in the assignments--the text will be properly typeset.
+                    <p><b>Images:</b> You can add images to questions in PNG or JPG format. Use the image file picker to select the images. In the question text where you want the image to appear, use the following syntax: [IMG]YOUR_IMAGE_NAME.jpg[/IMG]. The name of the image must match the file name exactly, including extension. Make sure not to use too large of images.
                 </div>
             </div>
             </div>
@@ -77,6 +78,8 @@
                 <div class="form-group">
                     <label>Assignment Title:</label>
                     <input class="form-control" type="text" id="assignment-title"/>
+                    <label for="image-upload">Images:</label>
+                    <input id="image-upload" type="file" multiple/>
                     <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
                     <button id="create-from-json" onclick="createFromJson();">Create from Direct Input</button>
                 </div>
@@ -120,7 +123,7 @@
                     <input type="text" class="form-control" id="question-answer" placeholder="Answer"/>
                 </div>
                 
-                <button id="add-question-button" onclick="addQuestion();">Add Question</button>
+                <button id="add-question-button">Add Question</button>
                 <button id="clear-question-button" onclick="clearQuestion();">Clear Question</button>
             </form>
             
@@ -130,7 +133,7 @@
                     <div class="panel-header">
                         <h4 class="text-center panel-title">Saved Questions</h4>
                     </div>
-                    <table class="question-output panel-body">
+                    <table class="question-output panel-body" id="question-list">
                         <thead class="question-header">
                             <tr>
                                 <th class="text-center">#</th>
@@ -141,6 +144,8 @@
                         <tbody id="current-questions">
                         </tbody>
                 </table>
+                <button id="toggle-editing-button">Edit</button>
+                <button id="delete-question-button">Delete</button>
                 </div>
                 <div id="download-info" class="panel well">
                     <div class="panel-header">
@@ -164,9 +169,5 @@
             <div class="col-md-12"></div>
         </div>
     </div>
-
-
-
-
   </body>
 </html>

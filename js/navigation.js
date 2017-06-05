@@ -2,7 +2,78 @@ $(document.body).ready(function(){
     localStorage['assignment'] = null;
     document.assignment = {};
     document.assignment.questions = [];
+    window.images = {};
+    sessionStorage.setItem('isEditing', false);
+    $("#add-question-button").on('click', function(event) {
+        editQuestion(); });
+    $("#clear-question-button").click(function(event) {clearQuestion()});
+    $("#delete-question-button").on('click', deleteQuestion);
+    $("#toggle-editing-button").on('click', toggleEditingMode);
+    $("#image-upload").on('change', getImageData);
 });
+
+function toggleEditingMode() {
+    var mode = sessionStorage.getItem('isEditing');
+    if (mode === "true") { 
+        sessionStorage.setItem('isEditing', false);
+        $("#add-question-button").html('Add Question');
+    }
+    else {
+        sessionStorage.setItem('isEditing', true);
+        $("#add-question-button").html('Save Question');
+    }
+    $("#toggle-editing-button").toggleClass('on');
+}
+
+function fillDialog(index){
+    var assignment = JSON.parse(localStorage.getItem("assignment")),
+    question = assignment.questions[index],
+    prompts;
+    console.log(index);
+    $("#question-title").val(question['title']);
+    $("#question-text").val(question['text']);
+    $("#question-answer").val(question['answer']);
+    $("#question-hint").val(question['hint']);
+    $("#question-type").val(question['type']);
+    if (question['type'] === 'multiple-choice') {
+        prompts = question['prompts'];
+        $('li input').forEach(function(e, index) {
+            e.val(prompts[index]);
+        })
+    }
+    
+}
+
+function deleteQuestion() {
+    var assignment = JSON.parse(localStorage.getItem('assignment')),
+        index = $('tr.selected').index();
+    assignment.questions.splice(index, 1);
+    document.assignment = assignment;
+    $('tr.selected').remove();
+    renumberTableRows(index);
+    storeAssigment();
+}
+
+function renumberTableRows(startingIndex) {
+    $('#current-questions td:first-child').each(function(){
+        var thisIndex = Number($(this).html());
+        if (thisIndex > startingIndex + 1) {
+            $(this).html(thisIndex - 1);
+        }
+    })
+}
+
+function editQuestion() {
+    if (sessionStorage.getItem('isEditing') === 'true') {
+        var index = $('tr.selected').index();
+        addQuestion(index);
+    }
+    else {
+        addQuestion(-1);
+    }
+    
+}
+
 function addTitle() {
     document.assignment['title'] = $('#assignment-title').val();
     storeAssigment();
@@ -18,33 +89,42 @@ function clearAssignment(){
 }
 
 function clearQuestion(){
-    var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
-        prompts = $('li input');
-    elements.forEach(function(e) {
+        var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
+            prompts = $('li input');
+        elements.forEach(function(e) {
         if (e !== '#question-type') {
             $(e).val('');
         }
         else {
             $(e).val('exact-case');
         }
-    });
-    prompts.val('');
-    questionTypeChanged();
+        });
+        prompts.val('');
+        questionTypeChanged();
+    
 }
 
 function generateTableRow(question, index){
-    return `<tr><td>${index}</td><td>${question.title}</td><td>${question.type}</td></tr>`
+    return `<tr id="question${index}"><td>${index}</td><td class="qtitle">${question.title}</td><td class='qtype'>${question.type}</td></tr>`
 }
 
 function updateQuestionDisplay(q, index){
     $('#current-questions').append(generateTableRow(q, index));
+    $("#current-questions tr").click( function(event) {
+        $(this).addClass('selected').siblings().removeClass('selected');
+        if (sessionStorage.getItem('isEditing') === "true") {
+            fillDialog($("tr.selected").index());
+        }
+    });
 }
 
-function addQuestion() {
+function addQuestion(index) {
     var numberOfQuestions,
         prompts,
         question = {},
-        questionType = $('#question-type').val();
+        questionType = $('#question-type').val(),
+        index = index === 0 ? index : (index || -1),
+        id = (index > -1? 'tr#question' + (index + 1) : null);
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
@@ -58,17 +138,24 @@ function addQuestion() {
         });
         question['prompts'] = prompts;
     }
-    numberOfQuestions = document.assignment['questions'].push(question);
-    updateQuestionDisplay(question, numberOfQuestions);
+    if (index !== -1){
+        document.assignment.questions[index] = question;
+        $(id +' td.qtitle').html(question['title']);
+        $(id +' td.qtype').html(question['type']);
+    }
+    else {
+        numberOfQuestions = document.assignment['questions'].push(question);
+        updateQuestionDisplay(question, numberOfQuestions);
+    }
     storeAssigment();
     clearQuestion();
-    console.log(document.assignment);
     return false;
 }
 
 function createFromJson () {
     var data = $('#output-json').val(),
         json = JSON.parse(data);
+    json['images'] = [];
     if (json['title'] === undefined || json['questions'].length === 0) {
         alert('Must supply valid JSON');
         return false;
@@ -100,6 +187,34 @@ function onFailure(data) {
     element.show();
 }
 
+function getImageData() {
+    function getPromise(file){
+        return new Promise(function(resolve, reject){
+            var reader = new FileReader();
+            reader.onload = function(evt){
+                window.images[file.name] = evt.target.result;
+                resolve();
+            };
+            reader.onerror = function(error) {
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    var uploadElement = $("#image-upload")[0].files,
+        promises = [];
+    for (var i=0; i < uploadElement.length; i++){
+        promises.push(getPromise(uploadElement[i]));
+    }
+    promises.reduce(function(cur, next){
+        return cur.then(next);
+    }, Promise.resolve()).then(function(){
+        return;
+    }
+    );
+}
+
 function makeRequest() {
     addTitle();
     if (document.assignment === undefined) {
@@ -108,6 +223,7 @@ function makeRequest() {
     if (document.assignment['title'] === undefined || document.assignment['questions'].length === 0){
         return false;
     }
+    document.assignment['images'] = window.images;
     $('#output-json').append(JSON.stringify(document.assignment));
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',

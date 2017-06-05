@@ -48,3 +48,11 @@ tbody {
     display: block;
 }
 
+tr.selected {
+    background-color: rgba(0,128,255,0.5);
+}
+
+button.on {
+    background-color: lightgreen;
+}
+
