@@ -77,6 +77,11 @@
                 <div class="form-group">
                     <label>Assignment Title:</label>
                     <input class="form-control" type="text" id="assignment-title"/>
+                    <label for="subject">Subject:</label>
+                    <select class="form-control" id="subject">
+                        <option value="Honors Chemistry">Honors Chemistry</option>
+                        <option value="Honors Physics">Honors Physics</option>
+                    </select>
                     <button id="create-assignment-button" onclick="makeRequest();">Create Assignment</button>
                     <button id="create-from-json" onclick="createFromJson();">Create from Direct Input</button>
                 </div>

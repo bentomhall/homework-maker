@@ -2,6 +2,9 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 define ('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
+
+require_once "repository.php";
+
 class Template {
     protected $file;
     protected $values = array();
@@ -113,14 +116,6 @@ function build_question($question_data, $question_number){
     file_put_contents($filename, $template->output());
     return $question_data["title"];
 }
-
-function update_js($file, $number_of_questions){
-    $contents = "var activeQuestions = ".($number_of_questions-1).";\n";
-    $contents .= "var assignmentSeed = ".$getGUID().";\n";
-    $contents .= file_get_contents($file);
-    file_put_contents($file, $contents);
-}
-
 function getGUID(){
     if (function_exists('com_create_guid')){
         return com_create_guid();
@@ -139,12 +134,19 @@ function getGUID(){
     }
 }
 
-function copy_supporting_files($number_of_questions){
+function update_js($file, $number_of_questions, $UUID){
+    $contents = "var activeQuestions = ".($number_of_questions-1).";\n";
+    $contents .= "var assignmentSeed = ".$UUID.";\n";
+    $contents .= file_get_contents($file);
+    file_put_contents($file, $contents);
+}
+
+function copy_supporting_files($number_of_questions, $UUID){
     $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css");
     foreach ($supporting_files as $file){
         copy(DOCUMENT_ROOT."/Resources/$file", "$file");
     }
-    update_js("validation.js", $number_of_questions);
+    update_js("validation.js", $number_of_questions, $UUID);
 }
 
 function create_zip($title, $number_of_questions, $images){
@@ -214,6 +216,23 @@ function validate_json($json){
         
 }
 
+function getCredentials() {
+    $raw = file_get_contents("config.json");
+    $json = json_decode($raw);
+    $creds = array();
+    $creds["user"] = $json["dbUser"];
+    $creds["secret"] = $json["dbSecret"];
+    return $creds;
+}
+
+
+function saveAssignment(Repository $repo, $title, $subject, $uuid) {
+    $subjectIDs = $repo->getSubjectCodes();
+    if (key_exists($subject, $subjectIDs)) {
+        $repo->saveAssignment($title, $uuid, $subjectIDs[$subject]);
+    }
+}
+
 $post_data = file_get_contents("php://input");
 $data = json_decode($post_data,true);
 if (!validate_json($data)) {
@@ -234,7 +253,11 @@ foreach ($data["questions"] as $qdata){
 }
 $images = $data['images'];
 build_index($title, $titles);
-copy_supporting_files($i);
+$uuid = getGUID();
+$credentials = getCredentials();
+$repo = new Repository($credentials);
+saveAssignment($repo, $title, $data["subject"], $uuid);
+copy_supporting_files($i, $uuid);
 $output = create_zip($escaped_title, $i, $images);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");

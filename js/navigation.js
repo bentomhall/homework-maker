@@ -76,6 +76,7 @@ function editQuestion() {
 
 function addTitle() {
     document.assignment['title'] = $('#assignment-title').val();
+    document.assignment['subject'] = $('#subject').val();
     storeAssigment();
 }
 

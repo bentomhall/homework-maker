@@ -1,2 +1,4 @@
 .DS_*
 *.zip
+config.json
+/nbproject/private/
