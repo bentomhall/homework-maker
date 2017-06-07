@@ -8,6 +8,15 @@
 
 require_once 'mysqli';
 
+function getCredentials() {
+    $raw = file_get_contents("config.json");
+    $json = json_decode($raw);
+    $creds = array();
+    $creds["user"] = $json["dbUser"];
+    $creds["secret"] = $json["dbSecret"];
+    return $creds;
+}
+
 class Repository {   
     function __construct($credentials) {
         $this->database = new mysqli("localhost", $credentials["user"], $credentials["secret"], "online_practice_module");
@@ -41,5 +50,29 @@ class Repository {
         }
     }
     
+    function getAllCompletionRecords() {
+        $result = $this->database->query("SELECT * FROM completionReport");
+        $output = array();
+        while ($row = $result->fetch_assoc()) {
+            $record = new CompletionRecord($row["studentEmail"], $row["title"], $row["completedOn"], $row["assignmentID"]);
+            $output[] = $record;
+        }
+        return $output;
+    }
+    
+}
+
+class CompletionRecord {
+    public $studentEmail = "";
+    public $assignmentName = "";
+    public $completedOn;
+    public $assignmentID = "";
+    
+    function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID) {
+        $this->studentEmail = $email;
+        $this->assignmentID = $assignmentID;
+        $this->assignmentName = $assignmentName;
+        $this->completedOn = $completionDate;
+    }
 }
 
