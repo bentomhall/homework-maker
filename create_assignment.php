@@ -225,7 +225,6 @@ function getCredentials() {
     return $creds;
 }
 
-
 function saveAssignment(Repository $repo, $title, $subject, $uuid) {
     $subjectIDs = $repo->getSubjectCodes();
     if (key_exists($subject, $subjectIDs)) {

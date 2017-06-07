@@ -1,6 +1,16 @@
+var activeQuestions = typeof(activeQuestions) === 'undefined' ? 4 : activeQuestions;
+var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmentSeed;
 var validator = {};
+var backingStore = localStorage;
+backingStore.getItemWithIndex = function (index) {
+    return this.getItem(assignmentSeed + index);
+};
 
-var backingStore = sessionStorage;
+backingStore.setItemForIndex = function (index, value) {
+    var key = assignmentSeed + index;
+    this.setItem(key, value);
+};
+
 validator.validateExact = function (submitted, correct) {
     "use strict";
     return submitted.trim() === correct.trim();
@@ -84,7 +94,7 @@ function validateAnswer(isMC) {
         submittedElement = document.querySelector("input[type=\"radio\"]:checked");
         if (submittedElement === null) {
             markAnswer(false);
-            sessionStorage.setItem(questionId, false);
+            sessionStorage.setItemForIndex(questionId, false);
             return;
         } else {
             submitted = submittedElement.value;
@@ -108,7 +118,7 @@ function validateAnswer(isMC) {
         isCorrect = validator.validateTextContainsAll(submitted, rightAnswer);
     }
     markAnswer(isCorrect);
-    backingStore.setItem(assignmentSeed + questionId, isCorrect);
+    backingStore.setItemForIndex(questionId, isCorrect);
 }
 
 function nextPage() {
@@ -128,9 +138,28 @@ function homePage() {
 
 function toggleCompletionCode() {
     "use strict";
-    var code = document.getElementById("completion-code");
+    var code = document.getElementById("completion-code"),
+        completionForm = document.getElementById("completion-form") || createNode('<div id="completion-form">\
+            <label for="student-email">Your email address:</label>\
+            <input type="text" name="student-email"/>\
+            <button onclick="sendCompletion()">Submit Completed Assignment</button>\
+            </div>');
     code.style.visibility = "visible";
+    if (completionForm) {
+        completionForm.style.visibility = "visible";
+    } else {
+    }
     return;
+}
+
+function createNode(html) {
+    var frag = document.createDocumentFragment(),
+        temp = document.createElement('div');
+    temp.innerHTML = html;
+    while (temp.firstChild) {
+        frag.appendChild(temp.firstChild);
+    }
+    return frag;
 }
 
 function validateHomePageLinks() {
@@ -142,7 +171,7 @@ function validateHomePageLinks() {
         validCount = 0;
     for (i; i <= activeQuestions; i += 1) {
         link = links[i - 1]; //0 indexed
-        isValid = backingStore.getItem(assignmentSeed + i); //1 indexed
+        isValid = backingStore.getItemForIndex(i); //1 indexed
         if (isValid === "true") {
             link.className = "question correct";
             validCount += 1;
@@ -159,7 +188,7 @@ function validateHomePageLinks() {
 
 function resetValidation(index) {
     "use strict";
-    backingStore.setItem(index, "unvalidated");
+    backingStore.setItemForIndex(index, "unvalidated");
 }
 
 function resetAllValidation() {
@@ -169,4 +198,20 @@ function resetAllValidation() {
         resetValidation(i);
     }
     location.reload(true);
+}
+
+function sendCompletion() {
+    var emailElement = document.getElementById("student-email"),
+        user_info = emailElement.value,
+        xhr;
+    if (!user_info || user_info.indexOf('@') === -1) {
+        return;
+    }
+    xhr = new XMLHTTPRequest();
+    xhr.open("POST", "https://teaching.admiralbenbo.org/api/completions", true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+        assignment: assignmentSeed,
+        student_email: user_info 
+    }));
 }
