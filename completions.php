@@ -10,7 +10,10 @@ require_once('repository.php');
 $repository = new Repository(getCredentials());
 
 function Respond(int $code, string $message = "") {
-    
+    http_response_code($code);
+    if ($message != "") {
+        echo $message;
+    }
 }
 
 
@@ -42,10 +45,9 @@ function AddCompletionRecord(Repository $repo, string $studentEmail, string $ass
  *  }
  * ]
  */
-//stub
 function GetAllCompletionRecords(Repository $repo) {
     $records = $repo->getAllCompletionRecords();
-    echo json_encode($records);
+    respond(200,json_encode($records));
 }
 
 //GET /api/assignment/$assignmentID
@@ -54,12 +56,25 @@ function GetAllCompletionRecords(Repository $repo) {
  * assignmentIDs are 38-character UUIDs (including {})
  * Response body JSON: same as above
  */
-//stub
-function GetCompletionRecordForAssignment(Repository $repo, string $assignmentID) {
-    
+function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentID) {
+    $records = $repo->getCompletionRecordForAssignment($assignmentID);
+    if ($records) {
+        respond(200, json_encode($records));
+    } else {
+        respond(404);
+    }
 }
 
 //GET /api/student/$studentEmail
 /*
  * Retrieve all completion records for the indicated student
  */
+
+function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) {
+    $records = $repo->getCompletionRecordForStudent($studentEmail);
+    if ($records) {
+        respond(200, json_encode($records));
+    } else {
+        respond(404);
+    }
+}

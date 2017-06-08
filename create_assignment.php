@@ -216,14 +216,7 @@ function validate_json($json){
         
 }
 
-function getCredentials() {
-    $raw = file_get_contents("config.json");
-    $json = json_decode($raw);
-    $creds = array();
-    $creds["user"] = $json["dbUser"];
-    $creds["secret"] = $json["dbSecret"];
-    return $creds;
-}
+
 
 function saveAssignment(Repository $repo, $title, $subject, $uuid) {
     $subjectIDs = $repo->getSubjectCodes();
