@@ -208,20 +208,21 @@ function validate_json($json){
             $is_valid = false;
         }
     }
-    if (!$is_valid) { 
-         header('X-PHP-RESPONSE-CODE: 400', true, 400);
-         echo $response_text;
+    if (!$is_valid) {
+        Respond(400, $response_text);
     }
     return $is_valid;
         
 }
 
-
-
 function saveAssignment(Repository $repo, $title, $subject, $uuid) {
     $subjectIDs = $repo->getSubjectCodes();
     if (key_exists($subject, $subjectIDs)) {
-        $repo->saveAssignment($title, $uuid, $subjectIDs[$subject]);
+        if (!($repo->saveAssignment($title, $uuid, $subjectIDs[$subject]))) {
+            Respond(500, "Internal Server Error");
+        }
+    } else {
+        Respond(400, "Invalid request body--subject not found");
     }
 }
 

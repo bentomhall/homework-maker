@@ -36,7 +36,9 @@ class Repository {
         $stmt->bind_param("ssi", $title, $uuid, $subjectId);
         if (!($stmt->execute())) {
             log_error("Failed saving assignment", $this->database->error);
+            return false;
         }
+        return true;
     }
 
     function getSubjectCodes() {
@@ -53,7 +55,9 @@ class Repository {
         $stmt->bind_param("ss", $student, $assigmentUUID);
         if (!($stmt->execute())) {
             log_error("Failed saving completion record", $this->database->error);
+            return false;
         }
+        return true;
     }
     
     function getAllCompletionRecords() {
@@ -79,7 +83,7 @@ class Repository {
             return $output;
         } else {
             log_error("Failed retrieving completion record", $this->database->error);
-            return;
+            return false;
         }
     }
     
@@ -96,7 +100,7 @@ class Repository {
             return $output;
         } else {
             log_error("Failed retrieving completion record", $this->database->error);
-            return;
+            return false;
         }
     }
     

@@ -28,8 +28,11 @@ function Respond(int $code, string $message = "") {
  */
 
 function AddCompletionRecord(Repository $repo, string $studentEmail, string $assignmentID) {
-    $repo->insertCompletion($studentEmail, $assignmentID);
-    Respond(200);
+    if (!($repo->insertCompletion($studentEmail, $assignmentID))) {
+        Respond(500, "Database Error");
+    }
+    
+    Respond(204);
     return;
 }
 
