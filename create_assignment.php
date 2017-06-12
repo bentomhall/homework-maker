@@ -5,6 +5,13 @@ define ('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
 
 require_once "repository.php";
 
+function Respond(int $code, string $message = "") {
+    http_response_code($code);
+    if ($message != "") {
+        echo $message;
+    }
+}
+
 class Template {
     protected $file;
     protected $values = array();
@@ -118,18 +125,16 @@ function build_question($question_data, $question_number){
 }
 function getGUID(){
     if (function_exists('com_create_guid')){
-        return com_create_guid();
+        return trim(com_create_guid(), '{}');
     }else{
         mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
         $charid = strtoupper(bin2hex(openssl_random_pseudo_bytes(16)));
         $hyphen = chr(45);// "-"
-        $uuid = chr(123)// "{"
-            .substr($charid, 0, 8).$hyphen
+        $uuid = substr($charid, 0, 8).$hyphen
             .substr($charid, 8, 4).$hyphen
             .substr($charid,12, 4).$hyphen
             .substr($charid,16, 4).$hyphen
-            .substr($charid,20,12)
-            .chr(125);// "}"
+            .substr($charid,20,12);
         return $uuid;
     }
 }

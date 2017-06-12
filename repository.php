@@ -6,11 +6,11 @@
  * and open the template in the editor.
  */
 
-require_once 'mysqli';
+#require_once 'mysqli';
 
 function getCredentials() {
-    $raw = file_get_contents("config.json");
-    $json = json_decode($raw);
+    $raw = file_get_contents(__DIR__ . "/config.json");
+    $json = json_decode($raw, true);
     $creds = array();
     $creds["user"] = $json["dbUser"];
     $creds["secret"] = $json["dbSecret"];
@@ -18,24 +18,28 @@ function getCredentials() {
 }
 
 function log_error(string $message, string $error) {
-    $log_message = $message .": ".$error;
-    error_log($log_message);
+    $log_message = $message .": ".$error . "\n";
+    error_log($log_message, 3, __DIR__ . "/error_log.txt");
     return;
 }
 
-class Repository {   
+class Repository {
+    private $database;
     function __construct($credentials) {
         $this->database = new mysqli("localhost", $credentials["user"], $credentials["secret"], "online_practice_module");
     }
     
-    function saveAssignment($title, $uuid, $subjectId) {
-        
-        if (!($stmt = $this->database->prepare("INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?, ?"))) {
+    function saveAssignment(string $title, string $uuid, int $subjectId) {
+        $stmt = $this->database->prepare("INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?)");
+        if (!($stmt)) {
             log_error("Failed to prepare statement", $this->database->error);
+            echo $this->database->error;
+            die();
         }
-        $stmt->bind_param("ssi", $title, $uuid, $subjectId);
+        $stmt->bind_param("sis", $title, $subjectId, $uuid);
         if (!($stmt->execute())) {
             log_error("Failed saving assignment", $this->database->error);
+            echo $this->database->error;
             return false;
         }
         return true;
@@ -64,7 +68,7 @@ class Repository {
         $result = $this->database->query("SELECT * FROM completionReport");
         $output = array();
         while ($row = $result->fetch_assoc()) {
-            $record = new CompletionRecord($row["studentEmail"], $row["title"], $row["completedOn"], $row["assignmentID"]);
+            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignmentID"]);
             $output[] = $record;
         }
         return $output;
@@ -110,7 +114,7 @@ class CompletionRecord {
     public $studentEmail = "";
     public $assignmentName = "";
     public $completedOn;
-    public $assignmentID = "";
+    public $assignmentTitle = "";
     
     function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID) {
         $this->studentEmail = $email;
