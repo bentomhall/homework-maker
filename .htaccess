@@ -1,8 +1,8 @@
-AuthName "Teaching"
-AuthUserFile "/home/admiral0/.htpasswds/public_html/teaching/passwd"
+#AuthName "Teaching"
+#AuthUserFile "/home/admiral0/.htpasswds/public_html/teaching/passwd"
 
 AddHandler application/x-httpd-php71 .php .php5 .php4 .php3
-CustomLog "logs/access_log" "%h %l %u %t \"%r\" %>s %b"
+#CustomLog "logs/access_log" "%h %l %u %t \"%r\" %>s %b"
 RewriteEngine On
 
 RewriteRule ^schedule/([0-9]+) schedule.php?year=$1

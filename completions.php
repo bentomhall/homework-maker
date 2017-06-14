@@ -16,14 +16,17 @@ function Respond(int $code, string $message = "") {
     }
 }
 
+function debug_log(string $message) {
+    file_put_contents("C:/Users/Documents/GitHub/homework_check/debug_log.txt", $message, FILE_APPEND);
+}
 
 //POST /api/completions
 /*
  * Add a completion to the database. Only 200 OK response on success.
  * JSON payload:
  * {
- *  "assignment": 38-character UUID string matching an assignment id,
- *  "student_email": email string to identify a particular student
+ *  "assignmentID": 38-character UUID string matching an assignment id,
+ *  "studentEmail": email string to identify a particular student
  * } 
  */
 
@@ -91,14 +94,17 @@ function main() {
             $student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_EMAIL);
             $assignment = filter_input(INPUT_GET, 'assignment', FILTER_SANITIZE_STRING);
             if ($student) {
+                debug_log("GETting records for student: ".$student);
                 GetCompletionRecordsForStudent($repository, $student);
                 break;
             }
             elseif ($assignment) {
+                debug_log("GETting records for assignment: ".$assignment);
                 GetCompletionRecordsForAssignment($repository, $assignment);
                 break;
             }
             else {
+                debug_log("GETting all records");
                 GetAllCompletionRecords($repository);
                 break;
             }
@@ -106,6 +112,7 @@ function main() {
             $post_data = file_get_contents('php://input');
             $data = json_decode($post_data, true);
             if (ValidateInput($data)) {
+                debug_log("POSTing record for student: ".$data["studentEmail"]." and assignment: ".$data["assignmentID"]);
                 AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
             } else {
                 Respond(400, "Invalid format in JSON request");
@@ -120,3 +127,5 @@ function ValidateInput(Array $data) {
     return (preg_match('/^[a-zA-Z]*@tampaprep\.org/g', $data['studentEmail']) 
             && preg_match('[0-9A-Fa-f]{36}', $data['assignmentID']));
 }
+
+main();
