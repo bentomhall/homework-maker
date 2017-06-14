@@ -59,7 +59,7 @@ class Repository {
         $stmt->bind_param("ss", $student, $assigmentUUID);
         if (!($stmt->execute())) {
             log_error("Failed saving completion record", $this->database->error);
-            return false;
+            throw new Exception("Failed saving completion record", $this->database->error);
         }
         return true;
     }

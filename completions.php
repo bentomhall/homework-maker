@@ -28,10 +28,11 @@ function Respond(int $code, string $message = "") {
  */
 
 function AddCompletionRecord(Repository $repo, string $studentEmail, string $assignmentID) {
-    if (!($repo->insertCompletion($studentEmail, $assignmentID))) {
-        Respond(500, "Database Error");
+    try {
+        $repo->insertCompletion($studentEmail, $assignmentID);
+    } catch (Exception $ex) {
+        Respond(500, "Database Error: ".$ex->getMessage());
     }
-    
     Respond(204);
     return;
 }
@@ -80,4 +81,42 @@ function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) 
     } else {
         respond(404);
     }
+}
+
+function main() {
+    global $repository;
+    $method = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+    switch ($method) {
+        case 'GET':
+            $student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_EMAIL);
+            $assignment = filter_input(INPUT_GET, 'assignment', FILTER_SANITIZE_STRING);
+            if ($student) {
+                GetCompletionRecordsForStudent($repository, $student);
+                break;
+            }
+            elseif ($assignment) {
+                GetCompletionRecordsForAssignment($repository, $assignment);
+                break;
+            }
+            else {
+                GetAllCompletionRecords($repository);
+                break;
+            }
+        case 'POST':
+            $post_data = file_get_contents('php://input');
+            $data = json_decode($post_data, true);
+            if (ValidateInput($data)) {
+                AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
+            } else {
+                Respond(400, "Invalid format in JSON request");
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+function ValidateInput(Array $data) {
+    return (preg_match('/^[a-zA-Z]*@tampaprep\.org/g', $data['studentEmail']) 
+            && preg_match('[0-9A-Fa-f]{36}', $data['assignmentID']));
 }
