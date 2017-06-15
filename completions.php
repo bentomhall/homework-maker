@@ -17,7 +17,7 @@ function Respond(int $code, string $message = "") {
 }
 
 function debug_log(string $message) {
-    file_put_contents("C:/Users/Documents/GitHub/homework_check/debug_log.txt", $message, FILE_APPEND);
+    file_put_contents(__DIR__."\debug_log.txt", $message."\n", FILE_APPEND);
 }
 
 //POST /api/completions
@@ -33,6 +33,7 @@ function debug_log(string $message) {
 function AddCompletionRecord(Repository $repo, string $studentEmail, string $assignmentID) {
     try {
         $repo->insertCompletion($studentEmail, $assignmentID);
+        debug_log("Inserted completion for student: ".$studentEmail." and assignment: ".$assignmentID);
     } catch (Exception $ex) {
         Respond(500, "Database Error: ".$ex->getMessage());
     }
@@ -111,7 +112,8 @@ function main() {
         case 'POST':
             $post_data = file_get_contents('php://input');
             $data = json_decode($post_data, true);
-            if (ValidateInput($data)) {
+            $isValidJSON = ValidateInput($data);
+            if ($isValidJSON) {
                 debug_log("POSTing record for student: ".$data["studentEmail"]." and assignment: ".$data["assignmentID"]);
                 AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
             } else {
@@ -124,8 +126,17 @@ function main() {
 }
 
 function ValidateInput(Array $data) {
-    return (preg_match('/^[a-zA-Z]*@tampaprep\.org/g', $data['studentEmail']) 
-            && preg_match('[0-9A-Fa-f]{36}', $data['assignmentID']));
+    $emailMatches = preg_match('/^[a-zA-Z]*@tampaprep\.org/', $data['studentEmail']);
+    $assignmentMatches = preg_match('/^[0-9A-Fa-f\-]{36}/', $data['assignmentID']);
+    if (!$emailMatches) {
+        debug_log("Invalid email: received ".$data['studentEmail']);
+        return false;
+    }
+    if (!$assignmentMatches) {
+        debug_log("Invalid assignment format--expected UUID, received ".$data['assignmentID']);
+        return false;
+    }
+    return true;
 }
 
 main();

@@ -19,7 +19,7 @@ function getCredentials() {
 
 function log_error(string $message, string $error) {
     $log_message = $message .": ".$error . "\n";
-    error_log($log_message, 3, __DIR__ . "/error_log.txt");
+    error_log($log_message, 3, __DIR__ . "\error_log.txt");
     return;
 }
 
@@ -59,7 +59,7 @@ class Repository {
         $stmt->bind_param("ss", $student, $assigmentUUID);
         if (!($stmt->execute())) {
             log_error("Failed saving completion record", $this->database->error);
-            throw new Exception("Failed saving completion record", $this->database->error);
+            throw new Exception("Failed saving completion record: ".$this->database->error);
         }
         return true;
     }
@@ -68,7 +68,7 @@ class Repository {
         $result = $this->database->query("SELECT * FROM completionReport");
         $output = array();
         while ($row = $result->fetch_assoc()) {
-            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignmentID"]);
+            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
             $output[] = $record;
         }
         return $output;
@@ -81,7 +81,7 @@ class Repository {
         if ($result) {
             $output = array();
             while ($row = $result->fetch_assoc()) {
-            $record = new CompletionRecord($row["studentEmail"], $row["title"], $row["completedOn"], $row["assignmentID"]);
+            $record = new CompletionRecord($row["studentEmail"], $row["title"], $row["completed_on"], $row["assignment_id"]);
             $output[] = $record;
             }
             return $output;
@@ -114,7 +114,7 @@ class CompletionRecord {
     public $studentEmail = "";
     public $assignmentName = "";
     public $completedOn;
-    public $assignmentTitle = "";
+    public $assignmentID = "";
     
     function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID) {
         $this->studentEmail = $email;
