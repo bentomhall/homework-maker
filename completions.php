@@ -7,6 +7,7 @@
  */
 
 require_once('repository.php');
+require_once('logger.php');
 $repository = new Repository(getCredentials());
 
 function Respond(int $code, string $message = "") {
@@ -14,10 +15,6 @@ function Respond(int $code, string $message = "") {
     if ($message != "") {
         echo $message;
     }
-}
-
-function debug_log(string $message) {
-    file_put_contents(__DIR__."\debug_log.txt", $message."\n", FILE_APPEND);
 }
 
 //POST /api/completions

@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-#require_once 'mysqli';
+require_once('logger.php');
 
 function getCredentials() {
     $raw = file_get_contents(__DIR__ . "/config.json");
@@ -15,12 +15,6 @@ function getCredentials() {
     $creds["user"] = $json["dbUser"];
     $creds["secret"] = $json["dbSecret"];
     return $creds;
-}
-
-function log_error(string $message, string $error) {
-    $log_message = $message .": ".$error . "\n";
-    error_log($log_message, 3, __DIR__ . "\error_log.txt");
-    return;
 }
 
 class Repository {
@@ -33,14 +27,12 @@ class Repository {
         $stmt = $this->database->prepare("INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?)");
         if (!($stmt)) {
             log_error("Failed to prepare statement", $this->database->error);
-            echo $this->database->error;
-            die();
+            throw new Exception("Failed to prepare statement: ".$this->database->error);
         }
         $stmt->bind_param("sis", $title, $subjectId, $uuid);
         if (!($stmt->execute())) {
             log_error("Failed saving assignment", $this->database->error);
-            echo $this->database->error;
-            return false;
+            throw new Exception("Failed saving assignment: ".$this->database->error);
         }
         return true;
     }

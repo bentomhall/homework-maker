@@ -254,7 +254,14 @@ build_index($title, $titles);
 $uuid = getGUID();
 $credentials = getCredentials();
 $repo = new Repository($credentials);
-saveAssignment($repo, $title, $data["subject"], $uuid);
+try {
+    saveAssignment($repo, $title, $data["subject"], $uuid);
+} catch (Exception $ex) {
+    http_response_code(400);
+    echo "Your assignment was not saved: ".$ex->getMessage();
+    die();
+}
+
 copy_supporting_files($i, $uuid);
 $output = create_zip($escaped_title, $i, $images);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
