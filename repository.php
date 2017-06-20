@@ -14,13 +14,24 @@ function getCredentials() {
     $creds = array();
     $creds["user"] = $json["dbUser"];
     $creds["secret"] = $json["dbSecret"];
+    $creds["database"] = $json["database"];
     return $creds;
 }
 
 class Repository {
     private $database;
     function __construct($credentials) {
-        $this->database = new mysqli("localhost", $credentials["user"], $credentials["secret"], "online_practice_module");
+        //$this->database = new mysqli("localhost", $credentials["user"], $credentials["secret"], $credentials["database"]);
+        $dbname = $credentials["database"];
+        $user = $credentials["user"];
+        $secret = $credentials["secret"];
+        $dsn = "mysql:host=localhost;dbname=$dbname;charset=utf8";
+        $opt = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        $this->database = new PDO($dsn, $user, $secret, $opt);
     }
     
     function saveAssignment(string $title, string $uuid, int $subjectId) {
@@ -29,18 +40,14 @@ class Repository {
             log_error("Failed to prepare statement", $this->database->error);
             throw new Exception("Failed to prepare statement: ".$this->database->error);
         }
-        $stmt->bind_param("sis", $title, $subjectId, $uuid);
-        if (!($stmt->execute())) {
-            log_error("Failed saving assignment", $this->database->error);
-            throw new Exception("Failed saving assignment: ".$this->database->error);
-        }
+        $stmt->execute([$title, $uuid, $subjectId]);
         return true;
     }
 
     function getSubjectCodes() {
         $result = $this->database->query("SELECT * FROM subject");
         $subjectCodes = array();
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             $subjectCodes[$row["name"]] = $row["id"];
         }
         return $subjectCodes;
@@ -48,22 +55,14 @@ class Repository {
     
     function insertCompletion($student, $assigmentUUID) {
         $stmt = $this->database->prepare("CALL insertCompletion(?,?)");
-        $stmt->bind_param("ss", $student, $assigmentUUID);
-        if (!($stmt->execute())) {
-            log_error("Failed saving completion record", $this->database->error);
-            throw new Exception("Failed saving completion record: ".$this->database->error);
-        }
-        return true;
+        $stmt->execute([$student, $assigmentUUID]);
+        return;
     }
     
     function getAllCompletionRecords() {
         $result = $this->database->query("SELECT * FROM completionreport");
-        if (!$result) {
-            log_error("Query failed", $this->database->error);
-            throw new Exception("Query failure: ".$this->database->error);
-        }
         $output = array();
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
             $output[] = $record;
         }
@@ -72,18 +71,10 @@ class Repository {
     
     function getCompletionRecordsForAssignment(string $assignmentID) {
         $stmt = $this->database->prepare("Select * FROM completionreport WHERE assignment_id = ? ORDER BY completed_on");
-        if (!$stmt) {
-            log_error("Failed to prepare statement", $this->database->error);
-            throw new Exception("Failed to prepare statement: ".$this->database->error);
-        }
-        $stmt->bind_param("s", $assignmentID);
-        $result = $stmt->execute();
-        if (!$result) {
-       	    log_error("Failed retrieving completion record", $this->database->error);
-            throw new Exception("Query failure: ".$this->database->error);
-        }
+        $stmt->execute([$assignmentID]);
+        $result = $stmt->fetchAll();
         $output = array();
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
             $output[] = $record;
        	}
@@ -92,21 +83,13 @@ class Repository {
     
     function getCompletionRecordsForStudent(string $studentEmail) {
         $stmt = $this->database->prepare("Select * FROM completionreport WHERE student_email = ? ORDER BY completed_on");
-        if (!$stmt) {
-            log_error("Failed to prepare statement", $this->database->error);
-            throw new Exception("Failed to prepare statement: ".$this->database->error);
-        }
-        $stmt->bind_param("s", $studentEmail);
-        $result = $stmt->execute();
-        if (!$result) {
-            log_error("Failed retrieving completion record", $this->database->error);
-            throw new Exception("Query failure: ".$this->database->error);
-        }
+        $stmt->execute([$studentEmail]);
+        $result = $stmt->fetchAll();
         $output = array();
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
             $output[] = $record;
-        }
+       	}
         return $output;
     }
     
