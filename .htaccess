@@ -11,4 +11,4 @@ RewriteRule ^definitions/([0-9]+) definitions.php?year=$1
 #POST api/completions
 RewriteRule ^api/completions completions.php
 RewriteRule ^api/assignment/([0-9A-F\-]{36}) completions.php?assignment=$1
-RewriteRule ^api/student/([a-z]*\%40tampaprep\.org) completions.php?student=$1
+RewriteRule ^api/student/([a-z]*@tampaprep\.org) completions.php?student=$1
