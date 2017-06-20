@@ -62,7 +62,7 @@ function GetAllCompletionRecords(Repository $repo) {
  * Response body JSON: same as above
  */
 function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentID) {
-    $records = $repo->getCompletionRecordForAssignment($assignmentID);
+    $records = $repo->getCompletionRecordsForAssignment($assignmentID);
     if ($records) {
         respond(200, json_encode($records));
     } else {
@@ -76,7 +76,7 @@ function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentI
  */
 
 function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) {
-    $records = $repo->getCompletionRecordForStudent($studentEmail);
+    $records = $repo->getCompletionRecordsForStudent($studentEmail);
     if ($records) {
         respond(200, json_encode($records));
     } else {
@@ -85,8 +85,11 @@ function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) 
 }
 
 function main() {
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: *");
+    header("Content-Type: application/json");
     global $repository;
-    $method = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+    $method = $_SERVER['REQUEST_METHOD'];//filter_input(INPUT_SERVER, 'REQUEST_METHOD');
     switch ($method) {
         case 'GET':
             $student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_EMAIL);
