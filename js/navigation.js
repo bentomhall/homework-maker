@@ -1,5 +1,5 @@
 $(document.body).ready(function(){
-    localStorage['assignment'] = null;
+    sessionStorage['assignment'] = null;
     document.assignment = {};
     document.assignment.questions = [];
     window.images = {};

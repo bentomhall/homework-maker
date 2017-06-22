@@ -8,3 +8,17 @@ and open the template in the editor.
     Author     : bhall
 */
 
+.completion-records {
+    width: 100%;
+}
+
+.completion-header {
+    width: 100%;
+}
+
+tr {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-flow: row;
+}

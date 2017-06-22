@@ -12,24 +12,44 @@ and open the template in the editor.
     <title>Completion Records</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/management.css" rel="stylesheet">
-    <script async src="js/management.js"></script>
+    
     </head>
     <body>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>
+        <script async src="js/management.js"></script>
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 well">
                     <h1 class="text-center">Completion Records</h1>
                 </div>
-                <div class="col-lg-12">
+                <div class="col-lg-12 well">
                     <div class="form-inline">
                         <label for="search-input">Search by assignment or student email</label>
                         <input class="form-control" type="text" id="search-input"/>
                         <button class="form-control" id="search"><span class="glyphicon glyphicon-search"></span></button>
                     </div>
-                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel well">
+                        <div class="panel-header">
+                            <h4 class="text-center panel-title">Saved Questions</h4>
+                        </div>
+                        <table class="completion-records panel-body" id="completion-list">
+                            <thead class="completion-header">
+                                <tr>
+                                    <th class="text-center">Assignment Name</th>
+                                    <th class="text-center">Student Email</th>
+                                    <th class="text-center">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completion-records">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
