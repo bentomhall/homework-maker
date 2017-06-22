@@ -141,7 +141,7 @@ function toggleCompletionCode() {
     var code = document.getElementById("completion-code"),
         completionForm = document.getElementById("completion-form") || createNode('<div id="completion-form">\
             <label for="student-email">Your email address:</label>\
-            <input type="text" name="student-email"/>\
+            <input type="text" id="student-email"/>\
             <button onclick="sendCompletion()">Submit Completed Assignment</button>\
             </div>');
     code.style.visibility = "visible";
