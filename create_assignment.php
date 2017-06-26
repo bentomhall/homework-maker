@@ -147,7 +147,7 @@ function update_js($file, $number_of_questions, $UUID){
 }
 
 function copy_supporting_files($number_of_questions, $UUID){
-    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "bootstrap.min.css");
+    $supporting_files = Array("correct_16.png", "incorrect_16.png", "validation.js", "main.css", "bootstrap.min.css");
     foreach ($supporting_files as $file){
         copy(DOCUMENT_ROOT."/Resources/$file", "$file");
     }
@@ -156,7 +156,7 @@ function copy_supporting_files($number_of_questions, $UUID){
 
 function create_zip($title, $number_of_questions, $images){
     $zip = new ZipArchive();
-    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html", "bootstrap.min.css");
+    $supporting_files = Array("correct_16.png", "incorrect_16.png", "validation.js", "main.css", "index.html", "bootstrap.min.css");
     for ($i = 1; $i < $number_of_questions; $i++) {
         $supporting_files[] = "question$i.html";
     }
@@ -267,5 +267,7 @@ $output = create_zip($escaped_title, $i, $images);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
 echo $downloadTemplate->output();
+chdir("..");
+rmdir($escaped_title);
 $date = date('M/d/Y h:i');
 file_put_contents('usage_log.log', "Processed $title on $date", FILE_APPEND);
