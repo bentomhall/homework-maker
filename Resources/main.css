@@ -77,6 +77,6 @@ h1 {
   color: black;
 }
 
-#completion-code, #completion-form {
+.completion {
   visibility: hidden
 }
