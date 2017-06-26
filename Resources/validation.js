@@ -1,21 +1,7 @@
 var activeQuestions = typeof(activeQuestions) === 'undefined' ? 4 : activeQuestions;
 var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmentSeed;
-var validator = {};
-var backingStore = localStorage;
-backingStore.getItemWithIndex = function (index) {
-    return this.getItem(assignmentSeed + index);
-};
-
-backingStore.setItemForIndex = function (index, value) {
-    var key = assignmentSeed + index;
-    this.setItem(key, value);
-};
-
-validator.validateExact = function (submitted, correct) {
-    "use strict";
-    return submitted.trim() === correct.trim();
-};
-validator.validateNumericWithin = function (submitted, correct, tolerance) {
+function Validator() {
+    this.validateNumericWithin = function (submitted, correct, tolerance) {
     "use strict";
     if (Number(correct) === 0) {
         return Math.abs(submitted) <= tolerance;
@@ -23,10 +9,11 @@ validator.validateNumericWithin = function (submitted, correct, tolerance) {
         return Math.abs(submitted - correct) / correct <= tolerance;
     }
 };
-
-// these next two functions are credit @anotherusername on what.thedailywtf.com
- 
-validator.validateTextContainsAny = function (submitted, requiredTerms) {
+    this.validateExact = function (submitted, correct) {
+    "use strict";
+    return submitted.trim() === correct.trim();
+};
+    this.validateTextContainsAny = function (submitted, requiredTerms) {
     "use strict";
     submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
     requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
@@ -39,7 +26,7 @@ validator.validateTextContainsAny = function (submitted, requiredTerms) {
   });
 };
 
-validator.validateTextContainsAll = function (submitted, requiredTerms) {
+    this.validateTextContainsAll = function (submitted, requiredTerms) {
     "use strict";
     submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
     requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
@@ -52,10 +39,27 @@ validator.validateTextContainsAll = function (submitted, requiredTerms) {
   });
 };
 
-validator.validateExactCaseInsensitive = function (submitted, correct) {
+    this.validateExactCaseInsensitive = function (submitted, correct) {
     "use strict";
     return submitted.toLowerCase().trim() === correct.toLowerCase().trim();
 };
+
+};
+
+function BackingStore() {
+    this.storage = localStorage;
+
+    this.getItemForIndex = function (index) {
+        return this.storage.getItem(assignmentSeed + index);
+    };
+
+    this.setItemForIndex = function (index, value) {
+        var key = assignmentSeed + index;
+        this.storage.setItem(key, value);
+    };
+}
+
+var backingStore = new BackingStore;
 
 function markAnswer(didValidate) {
     "use strict";
@@ -89,7 +93,8 @@ function validateAnswer(isMC) {
         questionId = document.getElementById("question-id").innerHTML,
         tolerance = 0.02,
         isCorrect = false,
-        submitted;
+        submitted,
+        validator = new Validator();
     if (isMC) {
         submittedElement = document.querySelector("input[type=\"radio\"]:checked");
         if (submittedElement === null) {
@@ -207,11 +212,17 @@ function sendCompletion() {
     if (!user_info || user_info.indexOf('@') === -1) {
         return;
     }
-    xhr = new XMLHTTPRequest();
+    xhr = new XMLHttpRequest();
     xhr.open("POST", "https://teaching.admiralbenbo.org/api/completions", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+            alert("Completion submitted successfully.");
+        }
+    };
+    
     xhr.send(JSON.stringify({
-        assignment: assignmentSeed,
-        student_email: user_info 
+        assignmentID: assignmentSeed,
+        studentEmail: user_info 
     }));
 }

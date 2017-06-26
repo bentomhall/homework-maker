@@ -141,7 +141,7 @@ function getGUID(){
 
 function update_js($file, $number_of_questions, $UUID){
     $contents = "var activeQuestions = ".($number_of_questions-1).";\n";
-    $contents .= "var assignmentSeed = ".$UUID.";\n";
+    $contents .= "var assignmentSeed = \"".$UUID."\";\n";
     $contents .= file_get_contents($file);
     file_put_contents($file, $contents);
 }
