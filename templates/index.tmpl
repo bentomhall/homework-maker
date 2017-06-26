@@ -3,23 +3,30 @@
 <head>
     <meta charset="utf-8" />
     <title>[@title]</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
     <script src="validation.js"></script>
 </head>
 <body onload="validateHomePageLinks()">
     <div class="container">
-        <h1 id="problem-set">[@title]</h1>
-        <ol id="problem-listing">
-            [@questions]
-        </ol>
-        <div id="completion-code">Your completion code is [@r] </div>
-        <div id="completion-form">
-            <label for="student-email">Your email address:</label>
-            <input type="text" name="student-email"/>
-            <button onclick="sendCompletion()">Submit Completed Assignment</button>
+        <div class="row well">
+            <h1 id="problem-set">[@title]</h1>
+            <ol id="problem-listing">
+                [@questions]
+            </ol>
         </div>
-        <a id="clear-validation" href="#" onclick="resetAllValidation()">Clear Answers</a>
-        <a id="next-page" href="question1.html">Start &gt;</a>
+        <div class="row well">
+            <div id="completion-code">Your completion code is [@r] </div>
+            <div id="completion-form">
+                <label for="student-email">Your email address:</label>
+                <input type="text" id="student-email"/>
+                <button onclick="sendCompletion()">Submit Completed Assignment</button>
+            </div>
+        </div>
+        <div class="row well">
+            <a id="clear-validation" href="#" onclick="resetAllValidation()">Clear Answers</a>
+            <a id="next-page" href="question1.html">Start &gt;</a>
+        </div>
     </div>
 </body>
 </html>

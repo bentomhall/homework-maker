@@ -5,7 +5,7 @@
 body {
   background-color: lightgrey;
 }
-
+/*
 .container {
   width: 80%;
   margin-left: 10%;
@@ -20,6 +20,7 @@ body {
   clear: both;
   display: table;
 }
+*/
 
 h1 {
   text-align: center;
@@ -27,6 +28,8 @@ h1 {
 
 #problem-listing li {
   margin-top: 0.5em;
+  /*width: intrinsic; safari/webkit*/
+  width: -webkit-max-content; /*chrome*/
 }
 
 #problem-listing {

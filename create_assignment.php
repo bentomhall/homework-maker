@@ -147,7 +147,7 @@ function update_js($file, $number_of_questions, $UUID){
 }
 
 function copy_supporting_files($number_of_questions, $UUID){
-    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css");
+    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "bootstrap.min.css");
     foreach ($supporting_files as $file){
         copy(DOCUMENT_ROOT."/Resources/$file", "$file");
     }
