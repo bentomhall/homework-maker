@@ -40,7 +40,7 @@ class Repository {
             log_error("Failed to prepare statement", $this->database->error);
             throw new Exception("Failed to prepare statement: ".$this->database->error);
         }
-        $stmt->execute([$title, $uuid, $subjectId]);
+        $stmt->execute([$title, $subjectId, $uuid]);
         return true;
     }
 

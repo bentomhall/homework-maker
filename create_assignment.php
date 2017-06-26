@@ -156,7 +156,7 @@ function copy_supporting_files($number_of_questions, $UUID){
 
 function create_zip($title, $number_of_questions, $images){
     $zip = new ZipArchive();
-    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html");
+    $supporting_files = Array("correct.png", "correct_16.png", "incorrect.png", "incorrect_16.png", "validation.js", "main.css", "index.html", "bootstrap.min.css");
     for ($i = 1; $i < $number_of_questions; $i++) {
         $supporting_files[] = "question$i.html";
     }
