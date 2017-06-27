@@ -2,48 +2,58 @@ var activeQuestions = typeof(activeQuestions) === 'undefined' ? 4 : activeQuesti
 var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmentSeed;
 function Validator() {
     this.validateNumericWithin = function (submitted, correct, tolerance) {
-    "use strict";
-    if (Number(correct) === 0) {
-        return Math.abs(submitted) <= tolerance;
-    } else {
-        return Math.abs(submitted - correct) / correct <= tolerance;
-    }
-};
+        "use strict";
+        if (Number(correct) === 0) {
+            return Math.abs(submitted) <= tolerance;
+        } else {
+            return Math.abs(submitted - correct) / correct <= tolerance;
+        }
+    };
+    
     this.validateExact = function (submitted, correct) {
-    "use strict";
-    return submitted.trim() === correct.trim();
-};
+        "use strict";
+        return submitted.trim() === correct.trim();
+    };
+    
     this.validateTextContainsAny = function (submitted, requiredTerms) {
-    "use strict";
-    submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
-    requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
-    return requiredTerms.some(function (word) {
-        var i = -1;
-        for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
-        // for each match, check that the character before and after the match is a non-word character
-            if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
-    }
-  });
-};
+        "use strict";
+        submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
+        requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
+        return requiredTerms.some(function (word) {
+            var i = -1;
+            for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
+            // for each match, check that the character before and after the match is a non-word character
+                if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
+            }
+        });
+    };
 
     this.validateTextContainsAll = function (submitted, requiredTerms) {
-    "use strict";
-    submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
-    requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
-    return requiredTerms.every(function (word) {
-        var i = -1;
-        for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
-      // for each match, check that the character before and after the match is a non-word character
-            if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
-    }
-  });
-};
+        "use strict";
+        submitted = submitted.toLowerCase().replace(/^|\s+|$/g, ' ');
+        requiredTerms = requiredTerms.toLowerCase().replace(/\s*,\s*/g, ',').match(/\w[^,]*/g);
+        return requiredTerms.every(function (word) {
+            var i = -1;
+            for (var i = -1; (i = submitted.indexOf(word, i + 1)) >= 0; ) {
+        // for each match, check that the character before and after the match is a non-word character
+                if (/\W/.test(submitted[i - 1]) && /\W/.test(submitted[i + word.length])) return true;
+            }
+        });
+    };
 
     this.validateExactCaseInsensitive = function (submitted, correct) {
-    "use strict";
-    return submitted.toLowerCase().trim() === correct.toLowerCase().trim();
-};
-
+        "use strict";
+        return submitted.toLowerCase().trim() === correct.toLowerCase().trim();
+    };
+        
+    this.validateMultipleSelection = function (submitted, correct) {
+        "use strict";
+        var isValid = false;
+        submitted.sort();
+        isValid = correct.every(function (value) {return submitted.indexOf(value) !== -1;});
+        isValid = isValid && submitted.every(function (value) {return submitted.indexOf(value) !== -1;});
+        return isValid;
+    };
 };
 
 function BackingStore() {
@@ -68,13 +78,13 @@ function markAnswer(didValidate) {
         hint = document.getElementById("hint");
     if (didValidate) {
         element.innerHTML = "Correct!";
-        element.className = "correct";
+        element.className = "btn-success";
         icon.src = "correct_16.png";
         icon.style.visibility = "visible";
         
     } else {
         element.innerHTML = "Try Again!";
-        element.className = "incorrect";
+        element.className = "btn-danger";
         icon.src = "incorrect_16.png";
         icon.style.visibility = "visible";
         if (!hint.innerHTML) {
@@ -99,10 +109,23 @@ function validateAnswer(isMC) {
         submittedElement = document.querySelector("input[type=\"radio\"]:checked");
         if (submittedElement === null) {
             markAnswer(false);
-            sessionStorage.setItemForIndex(questionId, false);
+            backingStore.setItemForIndex(questionId, false);
             return;
         } else {
             submitted = submittedElement.value;
+        }
+        
+    } else if (questionType === "multipleSelection") {
+        submittedElement = document.querySelectorAll("input[type\"checkbox\"]:checked");
+        if (submittedElement === null) {
+            markAnswer(false);
+            backingStore.setItemForIndex(questionId, false);
+            return;
+        } else {
+            submitted = [];
+            for (var item of submittedElement) {
+                submitted.push(item.value);
+            }
         }
     } else {
         submitted = document.getElementById("answer-entry").value;
@@ -121,6 +144,8 @@ function validateAnswer(isMC) {
         isCorrect = validator.validateTextContainsAny(submitted, rightAnswer);
     } else if (questionType === "containsAll") {
         isCorrect = validator.validateTextContainsAll(submitted, rightAnswer);
+    } else if (questionType === "multipleSelection") {
+        isCorrect = validator.validateMultipleSelection(submitted, rightAnswer);
     }
     markAnswer(isCorrect);
     backingStore.setItemForIndex(questionId, isCorrect);
@@ -208,6 +233,7 @@ function resetAllValidation() {
 function sendCompletion() {
     var emailElement = document.getElementById("student-email"),
         user_info = emailElement.value,
+        submit_button = document.getElementById("submit-button"),
         xhr;
     if (!user_info || user_info.indexOf('@') === -1) {
         return;
@@ -216,8 +242,9 @@ function sendCompletion() {
     xhr.open("POST", "https://teaching.admiralbenbo.org/api/completions", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             alert("Completion submitted successfully.");
+            submit_button.className = "btn-success";
         }
     };
     
