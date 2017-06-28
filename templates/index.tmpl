@@ -2,6 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>[@title]</title>
     <link href="bootstrap.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
@@ -15,9 +16,9 @@
                 [@questions]
             </ol>
         </div>
-        <div class="row well completion">
+        <div class="row well completion" id="completion-form">
             <div id="completion-code">Your completion code is [@r] </div>
-            <div id="completion-form">
+            <div class="form-group">
                 <label for="student-email">Your email address:</label>
                 <input type="email" id="student-email" required placeholder="you@tampaprep.org" pattern=".+@tampaprep.org" title="Use your tampaprep.org email."/>
                 <button id="submit-button" onclick="sendCompletion()" class="btn">Submit Completed Assignment</button>

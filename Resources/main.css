@@ -50,7 +50,6 @@ h1 {
 }
 .validation-icon {
   position: relative;
-  top: 8px;
   width: 20px;
   height: 20px;
   visibility: hidden;
@@ -78,5 +77,5 @@ h1 {
 }
 
 .completion {
-  visibility: hidden
+  display: none;
 }

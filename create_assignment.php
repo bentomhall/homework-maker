@@ -90,7 +90,7 @@ function build_prompts($data){
     $output = "";
     $i = 0;
     foreach ($data as $d){
-        $output .= '<input type="radio" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
+        $output .= '<input type="radio" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
         $i += 1;
     }
     return $output;

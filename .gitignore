@@ -4,4 +4,5 @@ config.json
 debug_log.txt
 *.ps1
 *.ppk
+*.log
 /nbproject/private/

@@ -91,7 +91,7 @@ function markAnswer(didValidate) {
             hint.innerHTML = "No hint available for this problem. Check your math and check for typos in your submitted answer.";
         }
         
-        hint.style.visibility = "visible";
+        hint.className = "col-md-6 show";
     }
 }
 
@@ -168,17 +168,8 @@ function homePage() {
 
 function toggleCompletionCode() {
     "use strict";
-    var code = document.getElementById("completion-code"),
-        completionForm = document.getElementById("completion-form") || createNode('<div id="completion-form">\
-            <label for="student-email">Your email address:</label>\
-            <input type="text" id="student-email"/>\
-            <button onclick="sendCompletion()">Submit Completed Assignment</button>\
-            </div>');
-    code.style.visibility = "visible";
-    if (completionForm) {
-        completionForm.style.visibility = "visible";
-    } else {
-    }
+    var code = document.getElementById("completion-form");
+    code.className = "row well completion show";
     return;
 }
 
@@ -243,7 +234,7 @@ function sendCompletion() {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            alert("Completion submitted successfully.");
+            submit_button.innerHTML = "Success!";
             submit_button.className = "btn-success";
         }
     };

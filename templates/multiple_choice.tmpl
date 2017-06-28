@@ -2,6 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>[@title]</title>
     <link href="bootstrap.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
@@ -14,10 +15,16 @@
     <div class="container">
         <div class="row well">
             <h1 id="problem-id">[@title]</h1>
-            <p id="question-text">[@text]</p>
-            [@prompts]    
-            <p id="hint">[@hint]</p>
+            <div class="col-md-6">
+                <h2>Question:</h2>
+                <p id="question-text" class="lead">[@text]</p>
+                [@prompts]
             </div>
+            <div class="col-md-6 hidden" id="hint">
+                <h2>Hint:</h2>
+                <p>[@hint]</p>
+            </div>
+        </div>
         <div class="row well">
             <button type="button" id="submit" onclick="validateAnswer(true)" class="unchecked">Check</button>
             <img class="validation-icon" src="incorrect.png" height="20" width="20">
