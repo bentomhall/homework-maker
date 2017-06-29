@@ -55,9 +55,8 @@ h1 {
   visibility: hidden;
 }
 
-#hint {
-  width: 50%;
-  visibility: hidden;
+#question {
+    margin-bottom: 1em;
 }
 
 .correct {

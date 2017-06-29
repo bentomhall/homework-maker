@@ -91,7 +91,7 @@ function markAnswer(didValidate) {
             hint.innerHTML = "No hint available for this problem. Check your math and check for typos in your submitted answer.";
         }
         
-        hint.className = "col-md-6 show";
+        hint.className = "row well show";
     }
 }
 
