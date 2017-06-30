@@ -51,7 +51,7 @@ function Validator() {
         var isValid = false;
         submitted.sort();
         isValid = correct.every(function (value) {return submitted.indexOf(value) !== -1;});
-        isValid = isValid && submitted.every(function (value) {return submitted.indexOf(value) !== -1;});
+        isValid = isValid && submitted.every(function (value) {return correct.indexOf(value) !== -1;});
         return isValid;
     };
 };
