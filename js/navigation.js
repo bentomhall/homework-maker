@@ -111,20 +111,20 @@ function generateTableRow(question, index){
 }
 
 function generateMultipleChoiceInput(index) {
-    var target = $('#question-prompts'),
-        node = $(`<li><input type="text" class="form-control prompt-item"/><input type="radio" name="correct-answer" value="${index}"></li>`);
+    var target = $('#question-prompts ol'),
+        node = $(`<li class="input-group"><span class="input-group-addon"><input type="radio" name="correct-answer" value="${index}"></span><input type="text" class="form-control prompt-item"/></li>`);
     target.append(node);
 }
 
 function generateMultipleSelectionInput(index) {
-    var target = $('#question-prompts'),
-        node = $(`<li><input type="text" class="form-control prompt-item"/><input type="checkbox" name="correct-answer" value="${index}"></li>`);
+    var target = $('#question-prompts ol'),
+        node = $(`<li class="input-group"><span class="input-group-addon"><input type="checkbox" name="correct-answer" value="${index}"></span><input type="text" class="form-control prompt-item"/></li>`);
     target.append(node);
 }
 
 function addPrompt() {
     var index = $("#question-prompts ol li").length, //0 indexed, so this is the next index
-        type = $("#question-type");
+        type = $("#question-type").val();
     if (type === "multiple-choice") {
         generateMultipleChoiceInput(index);
     } else if (type === "multiple-selection") {
@@ -198,8 +198,8 @@ function questionTypeChanged(){
     var isMultipleChoice = $('#question-type').val() === 'multiple-choice';
     if (isMultipleChoice) {
         if ($('#question-prompts ol li').length === 0) {
-            generateMultipleChoicePrompts(0);
-            generateMultipleChoicePrompts(1);
+            generateMultipleChoiceInput(0);
+            generateMultipleChoiceInput(1);
         }
         $("#question-prompts").toggleClass('visible', isMultipleChoice);
     }
