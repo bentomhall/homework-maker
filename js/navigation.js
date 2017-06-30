@@ -6,10 +6,11 @@ $(document.body).ready(function(){
     sessionStorage.setItem('isEditing', false);
     $("#add-question-button").on('click', function(event) {
         editQuestion(); });
-    $("#clear-question-button").click(function(event) {clearQuestion()});
+    $("#clear-question-button").click(function(event) {clearQuestion();});
     $("#delete-question-button").on('click', deleteQuestion);
     $("#toggle-editing-button").on('click', toggleEditingMode);
     $("#image-upload").on('change', getImageData);
+    $("#add-prompt-button").click(function(event) {addPrompt();});
 });
 
 function toggleEditingMode() {
@@ -39,7 +40,7 @@ function fillDialog(index){
         prompts = question['prompts'];
         $('li input').forEach(function(e, index) {
             e.val(prompts[index]);
-        })
+        });
     }
     
 }
@@ -60,7 +61,7 @@ function renumberTableRows(startingIndex) {
         if (thisIndex > startingIndex + 1) {
             $(this).html(thisIndex - 1);
         }
-    })
+    });
 }
 
 function editQuestion() {
@@ -106,7 +107,29 @@ function clearQuestion(){
 }
 
 function generateTableRow(question, index){
-    return `<tr id="question${index}"><td>${index}</td><td class="qtitle">${question.title}</td><td class='qtype'>${question.type}</td></tr>`
+    return `<tr id="question${index}"><td>${index}</td><td class="qtitle">${question.title}</td><td class='qtype'>${question.type}</td></tr>`;
+}
+
+function generateMultipleChoiceInput(index) {
+    var target = $('#question-prompts'),
+        node = $(`<li><input type="text" class="form-control prompt-item"/><input type="radio" name="correct-answer" value="${index}"></li>`);
+    target.append(node);
+}
+
+function generateMultipleSelectionInput(index) {
+    var target = $('#question-prompts'),
+        node = $(`<li><input type="text" class="form-control prompt-item"/><input type="checkbox" name="correct-answer" value="${index}"></li>`);
+    target.append(node);
+}
+
+function addPrompt() {
+    var index = $("#question-prompts ol li").length, //0 indexed, so this is the next index
+        type = $("#question-type");
+    if (type === "multiple-choice") {
+        generateMultipleChoiceInput(index);
+    } else if (type === "multiple-selection") {
+        generateMultipleSelectionInput(index);
+    }
 }
 
 function updateQuestionDisplay(q, index){
@@ -129,15 +152,18 @@ function addQuestion(index) {
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
-    question['answer'] = $('#question-answer').val();
+    
     question['type'] = questionType;
     if (questionType === 'multiple-choice') {
-        prompts = []
+        prompts = [];
         $(".prompt-item").each(function (index, element) {
             var el = $(element);
             prompts.push(el.val());
         });
         question['prompts'] = prompts;
+        question['answer'] = $('input[name=correct-answer]:checked').val();
+    } else {
+        question['answer'] = $('#question-answer').val();
     }
     if (index !== -1){
         document.assignment.questions[index] = question;
@@ -170,7 +196,14 @@ function createFromJson () {
 
 function questionTypeChanged(){
     var isMultipleChoice = $('#question-type').val() === 'multiple-choice';
-    $("#question-prompts").toggleClass('visible', isMultipleChoice);
+    if (isMultipleChoice) {
+        if ($('#question-prompts ol li').length === 0) {
+            generateMultipleChoicePrompts(0);
+            generateMultipleChoicePrompts(1);
+        }
+        $("#question-prompts").toggleClass('visible', isMultipleChoice);
+    }
+    
 }
 
 function updatePage(data) {
