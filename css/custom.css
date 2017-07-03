@@ -23,9 +23,9 @@ tbody {
     color: red;
 }
 
-.prompts {
+/*.prompts {
     display: none;
-}
+}*/
 
 .prompts li {
     list-style: none;

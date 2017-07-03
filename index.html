@@ -101,9 +101,10 @@
                         <option value="numeric-within">Numeric answer with 2% tolerance</option>
                         <option value="exact">Exact comparison (text or number)</option>
                         <option value="multiple-choice">Multiple Choice</option>
+                        <option value="multiple-selection">Multiple Selection</option>
                     </select>
                 </div>
-                <div class="form-group prompts" id="question-prompts">
+                <div class="form-group prompts hidden" id="question-prompts">
                     <label>Answer Prompts</label>
                     <button id="add-prompt-button" class="btn">Add Prompt</button>
                     <ol>
@@ -117,7 +118,7 @@
                     <label for="question-hint">Question Hint</label>
                     <textarea class="form-control" id="question-hint" placeholder="Question Hint"></textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group answer-group">
                     <label for="question-answer">Question Answer</label>
                     <input type="text" class="form-control" id="question-answer" placeholder="Answer"/>
                 </div>

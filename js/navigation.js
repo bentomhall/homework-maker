@@ -94,12 +94,12 @@ function clearQuestion(){
         var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
             prompts = $('li input');
         elements.forEach(function(e) {
-        if (e !== '#question-type') {
-            $(e).val('');
-        }
-        else {
-            $(e).val('exact-case');
-        }
+            if (e !== '#question-type') {
+                $(e).val('');
+            }
+            else {
+                $(e).val('exact-case');
+            }
         });
         prompts.val('');
         questionTypeChanged();
@@ -154,7 +154,7 @@ function addQuestion(index) {
     question['hint'] = $('#question-hint').val();
     
     question['type'] = questionType;
-    if (questionType === 'multiple-choice') {
+    if (questionType === 'multiple-choice' || questionType === 'multiple-selection') {
         prompts = [];
         $(".prompt-item").each(function (index, element) {
             var el = $(element);
@@ -195,15 +195,47 @@ function createFromJson () {
 }
 
 function questionTypeChanged(){
-    var isMultipleChoice = $('#question-type').val() === 'multiple-choice';
+    var isMultipleChoice = $('#question-type').val() === 'multiple-choice',
+        isMultipleSelection = $('#question-type').val() === "multiple-selection";
     if (isMultipleChoice) {
         if ($('#question-prompts ol li').length === 0) {
             generateMultipleChoiceInput(0);
             generateMultipleChoiceInput(1);
+        } else {
+            $('#question-prompts ol').empty();
+            generateMultipleChoiceInput(0);
+            generateMultipleChoiceInput(1);
         }
-        $("#question-prompts").toggleClass('visible', isMultipleChoice);
+        revealElement($('#question-prompts'));
+        hideElement($(".answer-group"));
+    } else if (isMultipleSelection) {
+        if ($('#question-prompts ol li').length === 0) {
+            generateMultipleSelectionInput(0);
+            generateMultipleSelectionInput(1);
+        } else {
+            $('#question-prompts ol').empty();
+            generateMultipleSelectionInput(0);
+            generateMultipleSelectionInput(1);
+        }
+        revealElement($('#question-prompts'));
+        hideElement($(".answer-group"));
+    } else {
+        hideElement($('#question-prompts'));
+        revealElement($(".answer-group"));
     }
     
+}
+
+function hideElement(element) {
+    if (!element.hasClass('hidden')) {
+        element.addClass('hidden');
+    }
+}
+
+function revealElement(element) {
+    if (element.hasClass('hidden')) {
+        element.removeClass('hidden');
+    }
 }
 
 function updatePage(data) {
