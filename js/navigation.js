@@ -1,3 +1,16 @@
+ function ImageData(filename, data) {
+     this.name = filename;
+     this.binData = data;
+     this.encodedData = btoa(data);
+ }
+ 
+ $(document).on('change', ':file', function() {
+        var input = $(this),
+            numFiles = input.get(0).files ? input.get(0).files.length : 1,
+            label = input.val().replace(/\\/g, '/').replace(/.*\//, "");
+        input.trigger('fileselect', [numFiles, label]);
+    });
+
 $(document.body).ready(function(){
     sessionStorage['assignment'] = null;
     document.assignment = {};
@@ -9,9 +22,21 @@ $(document.body).ready(function(){
     $("#clear-question-button").click(function(event) {clearQuestion();});
     $("#delete-question-button").on('click', deleteQuestion);
     $("#toggle-editing-button").on('click', toggleEditingMode);
-    $("#image-upload").on('change', getImageData);
     $("#add-prompt-button").click(function(event) {addPrompt();});
+    $(':file').on('fileselect', function(event, numFiles, label) {
+        if (numFiles > 0) {
+            var node = $(`<li class="list-group-item">${label}</li>`),
+                reader = new FileReader();
+            $('#file-list').append(node);
+            reader.onload = (function(name) {return function(e) {storeImage(name, e.target.result);};})(label);
+            reader.readAsDataURL($('#picker').get(0).files[0]);
+        }
+    });
 });
+
+function storeImage(name, data) {
+    window.images[`"${name}"`] = data;
+}
 
 function toggleEditingMode() {
     var mode = sessionStorage.getItem('isEditing');
@@ -253,34 +278,6 @@ function onFailure(data) {
     element.show();
 }
 
-function getImageData() {
-    function getPromise(file){
-        return new Promise(function(resolve, reject){
-            var reader = new FileReader();
-            reader.onload = function(evt){
-                window.images[file.name] = evt.target.result;
-                resolve();
-            };
-            reader.onerror = function(error) {
-                reject(error);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    var uploadElement = $("#image-upload")[0].files,
-        promises = [];
-    for (var i=0; i < uploadElement.length; i++){
-        promises.push(getPromise(uploadElement[i]));
-    }
-    promises.reduce(function(cur, next){
-        return cur.then(next);
-    }, Promise.resolve()).then(function(){
-        return;
-    }
-    );
-}
-
 function makeRequest() {
     addTitle();
     if (document.assignment === undefined) {
@@ -289,10 +286,12 @@ function makeRequest() {
     if (document.assignment['title'] === undefined || document.assignment['questions'].length === 0){
         return false;
     }
+    
     document.assignment['images'] = window.images;
     $('#output-json').append(JSON.stringify(document.assignment));
     var jsonData = JSON.stringify(document.assignment),
         url = 'create_assignment.php',
         handler = updatePage;
+    console.log(document.assignment.images);
     $.post(url, jsonData, handler).fail(function(data) {console.log(data); onFailure(data);});
 }

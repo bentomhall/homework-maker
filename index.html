@@ -128,7 +128,21 @@
             </form>
             
             </div>
-            <div class="col-md-4 panel-group"><!--current saved questions -->
+            <div class="col-md-4 panel-group">
+                <div class="panel well">
+                    <div class="panel-header">
+                        <h4 class="text-center panel-title">Images</h4>
+                    </div>
+                    <div class="panel-body">
+                        <label class="btn btn-default btn-file">
+                            Select Images <input type="file" id='picker' class="hidden" multiple="multiple">
+                        </label>
+                        <ul class="list-group" id="file-list">
+                        
+                        </ul>
+                    </div>
+                </div>
+                <!--current saved questions -->
                 <div class="panel well">
                     <div class="panel-header">
                         <h4 class="text-center panel-title">Saved Questions</h4>
@@ -148,6 +162,7 @@
                 <button id="delete-question-button">Delete</button>
                 </div>
                 <div id="download-info" class="panel well">
+
                     <div class="panel-header">
                         <h4 class="panel-title">
                             Download information
