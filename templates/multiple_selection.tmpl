@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>[@title]</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="main.css" rel="stylesheet">
+    <script src="validation.js"></script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.org/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body>
+    <div class="container">
+        <div class="row well">
+            <h1 id="problem-id">[@title]</h1>
+            <div id="question">
+                <h2>Question:</h2>
+                <p id="question-text" class="lead">[@text]</p>
+                [@prompts]
+            </div>
+            <div class="form-inline">
+                <!--<input type="text" id="answer-entry" required class="form-control">-->
+                <button type="button" id="submit" onclick="validateAnswer()" class="btn-primary form-control">Check</button>
+                <img class="validation-icon" src="incorrect_16.png" height="20" width="20">
+            </div>
+        </div>
+        <div class="row well hidden" id="hint">
+            <h2>Hint:</h2>
+            <p>[@hint]</p>
+        </div>
+        <div class="row well">
+            <button onclick="nextPage()">Next&gt;</button>
+            <button onclick="homePage()">Home</button>
+            <p id="answer">[@answer]</p>
+            <p id="question-type">multiple-selection</p>
+            <p id="question-id">[@id]</p>
+        </div>
+    </div>
+</body>
+</html>
