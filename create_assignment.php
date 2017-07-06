@@ -87,9 +87,11 @@ class AssignmentOutput {
     public function createZip(string $UUID){
         $zip = new ZipArchive();
         $filename = $this->outputDirectory . $this->escaped_title.".zip";
-
-        if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
-            exit("cannot open <$filename>\n");
+        $index = 0;
+        while ($zip->open($filename, ZipArchive::CREATE)==ZipArchive::ER_EXISTS) {
+            //keep trying to increment the number until it succeeds.
+            $filename = $this->outputDirectory . $this->escaped_title.$index.".zip";
+            $index += 1;
         }
         $this->addSupportingFiles($UUID);
         foreach ($this->file_contents as $name => $contents) {
