@@ -12,6 +12,108 @@ function Respond(int $code, string $message = "") {
     }
 }
 
+class AssignmentOutput {
+    protected $title;
+    protected $escaped_title;
+    protected $numQuestions = 1;
+    protected $questionTitles = array();
+    protected $file_contents = array();
+    protected $supporting_files = Array("correct_16.png", "incorrect_16.png", "main.css", "bootstrap.min.css");
+    protected $resourceDirectory = DOCUMENT_ROOT . '/Resources/';
+    protected $outputDirectory = DOCUMENT_ROOT . '/downloads/';
+    public function __construct(string $title) {
+        $this->title = $title;
+        $this->escaped_title = str_replace(' ', '', $title); //for filenames
+    }
+    
+    public function addFile(string $name, string $contents) {
+        $this->file_contents[$name] = $contents;
+        return;
+    }
+    
+    private function update_js($UUID){
+        $contents = "var activeQuestions = ".($this->numQuestions).";\n";
+        $contents .= "var assignmentSeed = \"".$UUID."\";\n";
+        $contents .= file_get_contents($this->resourceDirectory . "validation.js");
+        $this->addFile('validation.js', $contents);
+    }
+    
+    public function addIndex(){
+        $template = new Template(DOCUMENT_ROOT."/templates/index.tmpl");
+        $template->set("title", $this->title);
+        $template->set("questions", get_question_templates($this->questionTitles));
+        $template->set("r", rand(1000,9999));
+        $filename = "index.html";
+        $this->addFile($filename, $template->output());
+    }
+    
+    public function addQuestion($question_data){
+        if ($question_data["type"] == "multiple-choice"){
+            $template = new Template(DOCUMENT_ROOT."/templates/multiple_choice.tmpl");
+            $template->set("prompts", $this->buildPrompts($question_data["prompts"], false));
+        } 
+        else if ($question_data["type"] == "multiple-selection") {
+            $template = new Template(DOCUMENT_ROOT."/templates/multiple_selection.tmpl");
+            $template->set("prompts", $this->buildPrompts($question_data["prompts"], true));
+        }
+        else {
+            $template = new Template(DOCUMENT_ROOT."/templates/question.tmpl");
+        }
+        $template->set("id", $this->numQuestions);
+        foreach ($question_data as $key => $value) {
+            if ($key != "prompts") {
+                $template->set($key, $value);
+            }
+        }
+        $filename = "question".$this->numQuestions.".html";
+        $this->numQuestions += 1;
+        $this->addFile($filename, $template->output());
+        $this->questionTitles[] = $question_data['title'];
+    }
+    
+    private function addSupportingFiles($UUID){
+        foreach ($this->supporting_files as $file) {
+            $contents = file_get_contents($this->resourceDirectory . $file);
+            $this->addFile($file, $contents);
+        }
+        $this->update_js($UUID);
+    }
+    
+    public function addImage(string $name, $data) {
+        $payload = base64_decode(explode(',', $data)[1]);
+        $this->addFile($name, $payload);
+    }
+    
+    public function createZip(string $UUID){
+        $zip = new ZipArchive();
+        $filename = $this->outputDirectory . $this->escaped_title.".zip";
+
+        if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
+            exit("cannot open <$filename>\n");
+        }
+        $this->addSupportingFiles($UUID);
+        foreach ($this->file_contents as $name => $contents) {
+            $zip->addFromString($name, $contents);
+        }
+        $zip->close();
+        return basename($filename);
+    }
+    
+    private function buildPrompts($data, $isSelection = false){
+        $output = "";
+        $i = 0;
+        foreach ($data as $d){
+            if ($isSelection) {
+                $output .= '<input type="checkbox" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
+            } else {
+                $output .= '<input type="radio" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
+            }
+            $i += 1;
+        }
+        return $output;
+    }
+}
+
 class Template {
     protected $file;
     protected $values = array();
@@ -53,8 +155,6 @@ class Template {
  
     return $output;
     }
-    
-
 }
 
 function sanitize($data){
@@ -63,8 +163,14 @@ function sanitize($data){
                      '/_(.?)_/',
                      '/\[LIST\](.*)\[\/LIST\]/',
                      '/\[B\](.*)\[\/B\]/',
-                     '/\[_]/');
-        $replacements = Array('<sup>${1}</sup>', '<sub>${1}</sub>', '<ul>${1}</ul>', '<b>${1}</b>', '____________');
+                     '/\[_]/',
+                     '/\[IMG\](.*)\[\/IMG\]/');
+        $replacements = Array('<sup>${1}</sup>', 
+                              '<sub>${1}</sub>', 
+                              '<ul>${1}</ul>', 
+                              '<b>${1}</b>', 
+                              '____________',
+                              '<img src="${1}" class="image-md" height="300" alt="${1}">');
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
@@ -86,43 +192,6 @@ function get_question_templates(Array $items){
     return Template::merge($templates);
 }
 
-function build_prompts($data){
-    $output = "";
-    $i = 0;
-    foreach ($data as $d){
-        $output .= '<input type="radio" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
-        $i += 1;
-    }
-    return $output;
-}
-
-function build_index($title, $question_titles){
-    $template = new Template(DOCUMENT_ROOT."/templates/index.tmpl");
-    $template->set("title", $title);
-    $template->set("questions", get_question_templates($question_titles));
-    $template->set("r", rand(1000,9999));
-    $filename = "index.html";
-    file_put_contents($filename, $template->output());
-}
-
-function build_question($question_data, $question_number){
-    if ($question_data["type"] == "multiple-choice"){
-        $template = new Template(DOCUMENT_ROOT."/templates/multiple_choice.tmpl");
-        $template->set("prompts", build_prompts($question_data["prompts"]));
-    }
-    else {
-        $template = new Template(DOCUMENT_ROOT."/templates/question.tmpl");
-    }
-    $template->set("id", $question_number);
-    foreach ($question_data as $key => $value) {
-        if ($key != "prompts") {
-            $template->set($key, $value);
-        }
-    }
-    $filename = "question".$question_number.".html";
-    file_put_contents($filename, $template->output());
-    return $question_data["title"];
-}
 function getGUID(){
     if (function_exists('com_create_guid')){
         return trim(com_create_guid(), '{}');
@@ -137,50 +206,6 @@ function getGUID(){
             .substr($charid,20,12);
         return $uuid;
     }
-}
-
-function update_js($file, $number_of_questions, $UUID){
-    $contents = "var activeQuestions = ".($number_of_questions-1).";\n";
-    $contents .= "var assignmentSeed = \"".$UUID."\";\n";
-    $contents .= file_get_contents($file);
-    file_put_contents($file, $contents);
-}
-
-function copy_supporting_files($number_of_questions, $UUID){
-    $supporting_files = Array("correct_16.png", "incorrect_16.png", "validation.js", "main.css", "bootstrap.min.css");
-    foreach ($supporting_files as $file){
-        copy(DOCUMENT_ROOT."/Resources/$file", "$file");
-    }
-    update_js("validation.js", $number_of_questions, $UUID);
-}
-
-function create_zip($title, $number_of_questions, $images){
-    $zip = new ZipArchive();
-    $supporting_files = Array("correct_16.png", "incorrect_16.png", "validation.js", "main.css", "index.html", "bootstrap.min.css");
-    for ($i = 1; $i < $number_of_questions; $i++) {
-        $supporting_files[] = "question$i.html";
-    }
-    $filename = preg_replace('/tmp$/', '', $title).".zip";
-
-    if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
-        exit("cannot open <$filename>\n");
-    }
-    foreach ($supporting_files as $file){
-        $zip->addFile($file, "$file");
-    }
-    if (count($images) > 0) {
-        foreach ($images as $image => $data){
-            $payload = explode(',', $data)[1];
-            $zip->addFromString("$image", base64_decode($payload));
-        }
-    }
-    $zip->close();
-    copy($filename, DOCUMENT_ROOT."/downloads/$filename");
-    foreach ($supporting_files as $file) {
-        unlink($file);
-    }
-    unlink($filename);
-    return basename($filename);
 }
 
 function has_value_for_key($array, $key){
@@ -237,37 +262,27 @@ if (!validate_json($data)) {
     exit(1);
 }
 $title = $data["title"];
-$escaped_title = str_replace(' ', '', $title)."tmp"; //stupid spaces
-if (!file_exists($escaped_title)){
-    mkdir($escaped_title, 0744, true);
-}
-chdir($escaped_title);
-$titles = Array();
-$i = 1;
+$outputData = new AssignmentOutput($title);
 foreach ($data["questions"] as $qdata){
-    build_question($qdata, $i);
-    $i += 1;
-    $titles[] = $qdata["title"];
+    $outputData->addQuestion($qdata);
 }
-$images = $data['images'];
-build_index($title, $titles);
+foreach ($data['images'] as $name => $image) {
+    $outputData->addImage($name, $image);
+}
+$outputData->addIndex();
 $uuid = getGUID();
 $credentials = getCredentials();
 $repo = new Repository($credentials);
 try {
     saveAssignment($repo, $title, $data["subject"], $uuid);
 } catch (Exception $ex) {
-    http_response_code(400);
-    echo "Your assignment was not saved: ".$ex->getMessage();
-    die();
+    Respond(400, "Your assignment was not saved: ".$ex->getMessage());
+    exit(1);
 }
 
-copy_supporting_files($i, $uuid);
-$output = create_zip($escaped_title, $i, $images);
+$output = $outputData->createZip($uuid);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
-echo $downloadTemplate->output();
-chdir("..");
-rmdir($escaped_title);
+Respond(200, $downloadTemplate->output());
 $date = date('M/d/Y h:i');
 file_put_contents('usage_log.log', "Processed $title on $date", FILE_APPEND);

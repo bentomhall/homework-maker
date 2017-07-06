@@ -35,7 +35,7 @@ $(document.body).ready(function(){
 });
 
 function storeImage(name, data) {
-    window.images[`"${name}"`] = data;
+    window.images[name] = data;
 }
 
 function toggleEditingMode() {
