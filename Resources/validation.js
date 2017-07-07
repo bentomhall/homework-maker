@@ -115,8 +115,9 @@ function validateAnswer(isMC) {
             submitted = submittedElement.value;
         }
         
-    } else if (questionType === "multipleSelection") {
-        submittedElement = document.querySelectorAll("input[type\"checkbox\"]:checked");
+    } else if (questionType === "multiple-selection") {
+        rightAnswer = rightAnswer.split(' ');
+        submittedElement = document.querySelectorAll("input=[type\"checkbox\"]:checked");
         if (submittedElement === null) {
             markAnswer(false);
             backingStore.setItemForIndex(questionId, false);
@@ -140,11 +141,11 @@ function validateAnswer(isMC) {
         isCorrect = validator.validateExact(submitted, rightAnswer);
     } else if (questionType === "exact-case") {
         isCorrect = validator.validateExactCaseInsensitive(submitted, rightAnswer);
-    } else if (questionType === "containsAny") {
+    } else if (questionType === "contains-any") {
         isCorrect = validator.validateTextContainsAny(submitted, rightAnswer);
-    } else if (questionType === "containsAll") {
+    } else if (questionType === "contains-all") {
         isCorrect = validator.validateTextContainsAll(submitted, rightAnswer);
-    } else if (questionType === "multipleSelection") {
+    } else if (questionType === "multiple-selection") {
         isCorrect = validator.validateMultipleSelection(submitted, rightAnswer);
     }
     markAnswer(isCorrect);

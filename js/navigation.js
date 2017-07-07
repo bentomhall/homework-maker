@@ -173,7 +173,8 @@ function addQuestion(index) {
         question = {},
         questionType = $('#question-type').val(),
         index = index === 0 ? index : (index || -1),
-        id = (index > -1? 'tr#question' + (index + 1) : null);
+        id = (index > -1? 'tr#question' + (index + 1) : null),
+        answerElements = '';
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
@@ -186,7 +187,13 @@ function addQuestion(index) {
             prompts.push(el.val());
         });
         question['prompts'] = prompts;
-        question['answer'] = $('input[name=correct-answer]:checked').val();
+        if (questionType === 'multiple-choice') {
+            question['answer'] = $('input[name=correct-answer]:checked').val();
+        } else {
+            $('.prompts ol').find('input[name=correct-answer]:checked').forEach(function(e) {
+                answerElements += ' '+e.val();
+            });
+        }
     } else {
         question['answer'] = $('#question-answer').val();
     }

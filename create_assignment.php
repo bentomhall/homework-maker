@@ -32,7 +32,8 @@ class AssignmentOutput {
     }
     
     private function update_js($UUID){
-        $contents = "var activeQuestions = ".($this->numQuestions).";\n";
+        //indexing differences
+        $contents = "var activeQuestions = ".($this->numQuestions - 1).";\n";
         $contents .= "var assignmentSeed = \"".$UUID."\";\n";
         $contents .= file_get_contents($this->resourceDirectory . "validation.js");
         $this->addFile('validation.js', $contents);
@@ -87,12 +88,13 @@ class AssignmentOutput {
     public function createZip(string $UUID){
         $zip = new ZipArchive();
         $filename = $this->outputDirectory . $this->escaped_title.".zip";
-        $index = 0;
-        while ($zip->open($filename, ZipArchive::CREATE)==ZipArchive::ER_EXISTS) {
-            //keep trying to increment the number until it succeeds.
-            $filename = $this->outputDirectory . $this->escaped_title.$index.".zip";
-            $index += 1;
-        }
+        $zip->open($filename, ZipArchive::CREATE);
+//        $index = 0;
+//        while ($zip->open($filename, ZipArchive::CREATE)==ZipArchive::ER_EXISTS) {
+//            //keep trying to increment the number until it succeeds.
+//            $filename = $this->outputDirectory . $this->escaped_title.$index.".zip";
+//            $index += 1;
+//        }
         $this->addSupportingFiles($UUID);
         foreach ($this->file_contents as $name => $contents) {
             $zip->addFromString($name, $contents);
@@ -106,9 +108,9 @@ class AssignmentOutput {
         $i = 0;
         foreach ($data as $d){
             if ($isSelection) {
-                $output .= '<input type="checkbox" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
+                $output .= '<div class="form-check"><input type="checkbox" class="form-check-input" name="answer-entry" value="'.$i.'"/><span>'.sanitize($d).'</span></div>';
             } else {
-                $output .= '<input type="radio" class="checkbox-inline" name="answer-entry" value="'.$i.'"/>'.sanitize($d).'</br >';
+                $output .= '<div class="form-check"><input type="radio" class="form-check-input" name="answer-entry" value="'.$i.'"/><span>'.sanitize($d).'</span></div>';
             }
             $i += 1;
         }

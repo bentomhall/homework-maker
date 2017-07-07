@@ -78,3 +78,18 @@ h1 {
 .completion {
   display: none;
 }
+
+.form-check span {
+    margin-left: 10px;
+}
+
+input[type=checkbox], input[type=radio] {
+    margin: 0px;
+}
+
+.form-check > * {
+    margin-top: 0px;
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+}
