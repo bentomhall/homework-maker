@@ -5,7 +5,7 @@ define ('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
 
 require_once "repository.php";
 
-function Respond(int $code, string $message = "") {
+function sendHttpResponse(int $code, string $message = "") {
     http_response_code($code);
     if ($message != "") {
         echo $message;
@@ -17,7 +17,7 @@ class AssignmentOutput {
     protected $escaped_title;
     protected $numQuestions = 1;
     protected $questionTitles = array();
-    protected $file_contents = array();
+    protected $fileContents = array();
     protected $supporting_files = Array("correct_16.png", "incorrect_16.png", "main.css", "bootstrap.min.css");
     protected $resourceDirectory = DOCUMENT_ROOT . '/Resources/';
     protected $outputDirectory = DOCUMENT_ROOT . '/downloads/';
@@ -27,11 +27,11 @@ class AssignmentOutput {
     }
     
     public function addFile(string $name, string $contents) {
-        $this->file_contents[$name] = $contents;
+        $this->fileContents[$name] = $contents;
         return;
     }
     
-    private function update_js($UUID){
+    private function updateJs($UUID){
         $contents = "var activeQuestions = ".($this->numQuestions).";\n";
         $contents .= "var assignmentSeed = \"".$UUID."\";\n";
         $contents .= file_get_contents($this->resourceDirectory . "validation.js");
@@ -76,7 +76,7 @@ class AssignmentOutput {
             $contents = file_get_contents($this->resourceDirectory . $file);
             $this->addFile($file, $contents);
         }
-        $this->update_js($UUID);
+        $this->updateJs($UUID);
     }
     
     public function addImage(string $name, $data) {
@@ -94,7 +94,7 @@ class AssignmentOutput {
             $index += 1;
         }
         $this->addSupportingFiles($UUID);
-        foreach ($this->file_contents as $name => $contents) {
+        foreach ($this->fileContents as $name => $contents) {
             $zip->addFromString($name, $contents);
         }
         $zip->close();
@@ -173,10 +173,10 @@ function sanitize($data){
                               '<b>${1}</b>', 
                               '____________',
                               '<img src="${1}" class="image-md" height="300" alt="${1}">');
-        $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
-        $inner_replacement = '<li>${1}</li>';
+        $innerPattern = '/\[\*\](.*?)\[\/\*\]/';
+        $innerReplacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
-        $sanitized = preg_replace($inner_pattern, $inner_replacement, $sanitized);
+        $sanitized = preg_replace($innerPattern, $innerReplacement, $sanitized);
         $sanitized = preg_replace($patterns, $replacements, $sanitized);
         return $sanitized;
     }
@@ -210,40 +210,40 @@ function getGUID(){
     }
 }
 
-function has_value_for_key($array, $key){
+function hasValueForKey($array, $key){
     return isset($array[$key]);
 }
 
-function validate_json($json){
-    $is_valid = true;
-    $response_text = "";
+function validateJson($json){
+    $isValidJson = true;
+    $responseText = "";
     if (!isset($json['title'])) {
-        $response_text = '<p class="invalid">Must supply title</p>';
-        $is_valid = false;
+        $responseText = '<p class="invalid">Must supply title</p>';
+        $isValidJson = false;
     }
     elseif (!preg_match('/^[A-Za-z].*/', $json['title'])) {
         error_log($json['title']);
-        $response_text = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
-        $is_valid = false;
+        $responseText = '<p class="invalid">Invalid assignment title. Titles must begin with an alphabetic character</p>';
+        $isValidJson = false;
     }   
     elseif (!(isset($json["questions"]) && count($json["questions"]))) {
-        $response_text = '<p class="invalid">Must supply questions</p>';
-        $is_valid = false;
+        $responseText = '<p class="invalid">Must supply questions</p>';
+        $isValidJson = false;
     }
     foreach ($json["questions"] as $q){
         if (!isset($q["title"]) || !isset($q["text"]) || !isset($q["answer"]) || !isset($q["hint"])){
-            $response_text = '<p class="invalid">Question specification invalid for question with title '.htmlspecialchars($q["title"]).'</p>';
-            $is_valid = false;
+            $responseText = '<p class="invalid">Question specification invalid for question with title '.htmlspecialchars($q["title"]).'</p>';
+            $isValidJson = false;
         }
         else if ($q["type"] == "multiple-choice" && count($q["prompts"]) == 0){
-            $response_text = '<p class="invalid">Multiple choice question titled "'.$q['title']. '" must have at least one prompt</p>';
-            $is_valid = false;
+            $responseText = '<p class="invalid">Multiple choice question titled "'.$q['title']. '" must have at least one prompt</p>';
+            $isValidJson = false;
         }
     }
-    if (!$is_valid) {
-        Respond(400, $response_text);
+    if (!$isValidJson) {
+        sendHttpResponse(400, $responseText);
     }
-    return $is_valid;
+    return $isValidJson;
         
 }
 
@@ -251,16 +251,16 @@ function saveAssignment(Repository $repo, $title, $subject, $uuid) {
     $subjectIDs = $repo->getSubjectCodes();
     if (key_exists($subject, $subjectIDs)) {
         if (!($repo->saveAssignment($title, $uuid, $subjectIDs[$subject]))) {
-            Respond(500, "Internal Server Error");
+            sendHttpResponse(500, "Internal Server Error");
         }
     } else {
-        Respond(400, "Invalid request body--subject not found");
+        sendHttpResponse(400, "Invalid request body--subject not found");
     }
 }
 
 $post_data = file_get_contents("php://input");
 $data = json_decode($post_data,true);
-if (!validate_json($data)) {
+if (!validateJson($data)) {
     exit(1);
 }
 $title = $data["title"];
@@ -278,13 +278,13 @@ $repo = new Repository($credentials);
 try {
     saveAssignment($repo, $title, $data["subject"], $uuid);
 } catch (Exception $ex) {
-    Respond(400, "Your assignment was not saved: ".$ex->getMessage());
+    sendHttpResponse(400, "Your assignment was not saved: ".$ex->getMessage());
     exit(1);
 }
 
 $output = $outputData->createZip($uuid);
 $downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
-Respond(200, $downloadTemplate->output());
+sendHttpResponse(200, $downloadTemplate->output());
 $date = date('M/d/Y h:i');
 file_put_contents('usage_log.log', "Processed $title on $date", FILE_APPEND);

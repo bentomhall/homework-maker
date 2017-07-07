@@ -10,7 +10,7 @@ require_once('repository.php');
 require_once('logger.php');
 $repository = new Repository(getCredentials());
 
-function Respond(int $code, string $message = "") {
+function sendHttpResponse(int $code, string $message = "") {
     http_response_code($code);
     if ($message != "") {
         echo $message;
@@ -32,9 +32,9 @@ function AddCompletionRecord(Repository $repo, string $studentEmail, string $ass
         $repo->insertCompletion($studentEmail, $assignmentID);
         debug_log("Inserted completion for student: ".$studentEmail." and assignment: ".$assignmentID);
     } catch (Exception $ex) {
-        Respond(500, "Database Error: ".$ex->getMessage());
+        sendHttpResponse(500, "Database Error: ".$ex->getMessage());
     }
-    Respond(204);
+    sendHttpResponse(204);
     return;
 }
 
@@ -52,7 +52,7 @@ function AddCompletionRecord(Repository $repo, string $studentEmail, string $ass
  */
 function GetAllCompletionRecords(Repository $repo) {
     $records = $repo->getAllCompletionRecords();
-    respond(200,json_encode($records));
+    sendHttpResponse(200,json_encode($records));
 }
 
 //GET /api/assignment/$assignmentID
@@ -64,9 +64,9 @@ function GetAllCompletionRecords(Repository $repo) {
 function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentID) {
     $records = $repo->getCompletionRecordsForAssignment($assignmentID);
     if ($records) {
-        respond(200, json_encode($records));
+        sendHttpResponse(200, json_encode($records));
     } else {
-        respond(404);
+        sendHttpResponse(404);
     }
 }
 
@@ -78,9 +78,9 @@ function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentI
 function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) {
     $records = $repo->getCompletionRecordsForStudent($studentEmail);
     if ($records) {
-        respond(200, json_encode($records));
+        sendHttpResponse(200, json_encode($records));
     } else {
-        respond(404);
+        sendHttpResponse(404);
     }
 }
 
@@ -117,7 +117,7 @@ function main() {
                 debug_log("POSTing record for student: ".$data["studentEmail"]." and assignment: ".$data["assignmentID"]);
                 AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
             } else {
-                Respond(400, "Invalid format in JSON request");
+                sendHttpResponse(400, "Invalid format in JSON request");
             }
             break;
         default:
