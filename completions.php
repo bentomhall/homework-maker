@@ -87,6 +87,7 @@ function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) 
 function main() {
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: *");
+    header("Access-Control-Allow-Headers: *");
     header("Content-Type: application/json");
     global $repository;
     $method = $_SERVER['REQUEST_METHOD'];//filter_input(INPUT_SERVER, 'REQUEST_METHOD');

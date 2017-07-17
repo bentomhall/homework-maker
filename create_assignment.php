@@ -69,6 +69,9 @@ class AssignmentOutput {
                 $template->set($key, $value);
             }
         }
+        if (!has_value_for_key($question_data, "image-names")) {
+            $template->set("images", "");
+        }
         $filename = "question".$this->numQuestions.".html";
         $this->numQuestions += 1;
         $this->addFile($filename, $template->output());
@@ -282,9 +285,12 @@ $outputData = new AssignmentOutput($title);
 foreach ($data["questions"] as $qdata){
     $outputData->addQuestion($qdata);
 }
-foreach ($data['images'] as $name => $image) {
-    $outputData->addImage($name, $image);
+if (has_value_for_key($data, "images")) {
+    foreach ($data['images'] as $name => $image) {
+        $outputData->addImage($name, $image);
+    }
 }
+
 $outputData->addIndex();
 $uuid = getGUID();
 $credentials = getCredentials();

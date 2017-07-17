@@ -234,7 +234,7 @@ function sendCompletion() {
     xhr.open("POST", "https://teaching.admiralbenbo.org/api/completions", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 204) {
             submit_button.innerHTML = "Success!";
             submit_button.className = "btn-success";
         }
