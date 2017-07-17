@@ -62,7 +62,10 @@ class AssignmentOutput {
         }
         $template->set("id", $this->numQuestions);
         foreach ($question_data as $key => $value) {
-            if ($key != "prompts") {
+            if ($key == "image-names") {
+                $template->set("images", $this->buildImageTags($value));
+            }
+            else if ($key != "prompts") {
                 $template->set($key, $value);
             }
         }
@@ -116,6 +119,17 @@ class AssignmentOutput {
         }
         return $output;
     }
+    
+    private function buildImageTags($imageFiles) {
+        $imageTags = "";
+        foreach ($imageFiles as $imageFile) {
+            $template = new Template(__DIR__."/templates/image_slug.tmpl");
+            $template->set("src", $imageFile);
+            $imageTags .= $template->output()."\n";
+        }
+        
+        return $imageTags;
+    }
 }
 
 class Template {
@@ -136,7 +150,7 @@ class Template {
         $output = file_get_contents($this->file);
         foreach ($this->values as $key => $value) {
             $tagToReplace = "[@$key]";
-            if ($tagToReplace == "[@prompts]" || $tagToReplace == "[@questions]") {
+            if ($tagToReplace == "[@prompts]" || $tagToReplace == "[@questions]" || $tagToReplace == "[@images]") {
                 //these components are built out of already sanitized values but contain raw html themselves that should not be escaped.
                 $output = str_replace($tagToReplace, $value, $output);
             } 
@@ -167,14 +181,12 @@ function sanitize($data){
                      '/_(.?)_/',
                      '/\[LIST\](.*)\[\/LIST\]/',
                      '/\[B\](.*)\[\/B\]/',
-                     '/\[_]/',
-                     '/\[IMG\](.*)\[\/IMG\]/');
+                     '/\[_]/');
         $replacements = Array('<sup>${1}</sup>', 
                               '<sub>${1}</sub>', 
                               '<ul>${1}</ul>', 
                               '<b>${1}</b>', 
-                              '____________',
-                              '<img src="${1}" class="image-md" height="300" alt="${1}">');
+                              '____________');
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern

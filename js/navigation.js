@@ -23,6 +23,7 @@ $(document.body).ready(function(){
     $("#delete-question-button").on('click', deleteQuestion);
     $("#toggle-editing-button").on('click', toggleEditingMode);
     $("#add-prompt-button").click(function(event) {addPrompt();});
+    $(".btn-sm").click(function(event) {addImagePrompt();});
     $(':file').on('fileselect', function(event, numFiles, label) {
         if (numFiles > 0) {
             var node = $(`<li class="list-group-item">${label}</li>`),
@@ -33,6 +34,12 @@ $(document.body).ready(function(){
         }
     });
 });
+
+function addImagePrompt() {
+    var element = $("#image-names"),
+        node = $('<input type="text" class="form-control image-name" placeholder="Image file (from uploads)">');
+    element.append(node);
+}
 
 function storeImage(name, data) {
     window.images[name] = data;
@@ -116,9 +123,12 @@ function clearAssignment(){
 }
 
 function clearQuestion(){
-        var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint'],
+        var elements = ['#question-type', '#question-title', '#question-answer', '#question-text', '#question-hint', "#image-names"],
             prompts = $('li input');
         elements.forEach(function(e) {
+            if (e === '#image-names') {
+                $(e).empty();
+            }
             if (e !== '#question-type') {
                 $(e).val('');
             }
@@ -167,6 +177,14 @@ function updateQuestionDisplay(q, index){
     });
 }
 
+function getImageNames(element) {
+    var imageNames = [];
+    element.each(function (i, e) {
+       imageNames.push(e.value); 
+    });
+    return imageNames;
+}
+
 function addQuestion(index) {
     var numberOfQuestions,
         prompts,
@@ -174,25 +192,27 @@ function addQuestion(index) {
         questionType = $('#question-type').val(),
         index = index === 0 ? index : (index || -1),
         id = (index > -1? 'tr#question' + (index + 1) : null),
-        answerElements = '';
+        answerElements = '',
+        imageNames = [];
     question['title'] = $('#question-title').val();
     question['text'] = $('#question-text').val();
     question['hint'] = $('#question-hint').val();
+    question['image-names'] = getImageNames($('.image-name'));
     
     question['type'] = questionType;
     if (questionType === 'multiple-choice' || questionType === 'multiple-selection') {
         prompts = [];
         $(".prompt-item").each(function (index, element) {
-            var el = $(element);
-            prompts.push(el.val());
+            prompts.push(element.value);
         });
         question['prompts'] = prompts;
         if (questionType === 'multiple-choice') {
             question['answer'] = $('input[name=correct-answer]:checked').val();
         } else {
-            $('.prompts ol').find('input[name=correct-answer]:checked').forEach(function(e) {
-                answerElements += ' '+e.val();
+            $('.prompts ol').find('input[name=correct-answer]:checked').each(function(i, e) {
+                answerElements += ' '+e.value;
             });
+            question['answer'] = answerElements.trim();
         }
     } else {
         question['answer'] = $('#question-answer').val();

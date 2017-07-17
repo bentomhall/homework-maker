@@ -5,22 +5,6 @@
 body {
   background-color: lightgrey;
 }
-/*
-.container {
-  width: 80%;
-  margin-left: 10%;
-  background-color: white;
-  padding-left: 1em;
-  padding-bottom: 1em;
-  padding-right: 1em;
-}
-
-.container:after {
-  content: "";
-  clear: both;
-  display: table;
-}
-*/
 
 h1 {
   text-align: center;
@@ -92,4 +76,8 @@ input[type=checkbox], input[type=radio] {
     display: inline-block;
     vertical-align: middle;
     height: 20px;
+}
+
+#images {
+    margin: 1em 0px;
 }

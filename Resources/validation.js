@@ -117,7 +117,7 @@ function validateAnswer(isMC) {
         
     } else if (questionType === "multiple-selection") {
         rightAnswer = rightAnswer.split(' ');
-        submittedElement = document.querySelectorAll("input=[type\"checkbox\"]:checked");
+        submittedElement = document.querySelectorAll("input[type=\"checkbox\"]:checked");
         if (submittedElement === null) {
             markAnswer(false);
             backingStore.setItemForIndex(questionId, false);
