@@ -29,7 +29,7 @@ class Repository {
         $opt = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_EMULATE_PREPARES => true,
         ];
         $this->database = new PDO($dsn, $user, $secret, $opt);
     }
@@ -61,30 +61,49 @@ class Repository {
     
     function getAllCompletionRecords() {
         $result = $this->database->query("SELECT * FROM completionreport");
-        $output = array();
-        foreach ($result as $row) {
-            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
-            $output[] = $record;
-        }
-        return $output;
+        return $this->createRecordsFromResult($result);
     }
     
     function getCompletionRecordsForAssignment(string $assignmentID) {
         $stmt = $this->database->prepare("Select * FROM completionreport WHERE assignment_id = ? ORDER BY completed_on");
         $stmt->execute([$assignmentID]);
         $result = $stmt->fetchAll();
-        $output = array();
-        foreach ($result as $row) {
-            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
-            $output[] = $record;
-       	}
-        return $output;
+        return $this->createRecordsFromResult($result);
     }
     
     function getCompletionRecordsForStudent(string $studentEmail) {
         $stmt = $this->database->prepare("Select * FROM completionreport WHERE student_email = ? ORDER BY completed_on");
         $stmt->execute([$studentEmail]);
         $result = $stmt->fetchAll();
+        return $this->createRecordsFromResult($result);
+    }
+    
+    function getCompletionRecordsForAssignmentName(string $assignmentName) {
+        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE title = ? ORDER BY completed_on");
+        $stmt->execute([$assignmentName]);
+        $result = $stmt->fetchAll();
+        return $this->createRecordsFromResult($result);
+    }
+    
+    function getCompletionRecordsForSubject(string $subject) {
+        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE name = ? ORDER BY completed_on");
+        $stmt->execute([$subject]);
+        return $this->createRecordsFromResult($stmt->fetchAll());
+    }
+    
+    function getCompletionRecordsBeforeDate(string $date) {
+        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE completed_on < ? ORDER BY completed_on");
+        $stmt->execute([$date]);
+        return $this->createRecordsFromResult($stmt->fetchAll());
+    }
+    
+    function getCompletionRecordsAfterDate(string $date) {
+        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE completed_on > ? ORDER BY completed_on");
+        $stmt->execute([$date]);
+        return $this->createRecordsFromResult($stmt->fetchAll());
+    }
+    
+    private function createRecordsFromResult($result) {
         $output = array();
         foreach ($result as $row) {
             $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);

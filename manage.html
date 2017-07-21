@@ -28,6 +28,13 @@ and open the template in the editor.
                     <div class="form-inline">
                         <label for="search-input">Search by assignment or student email</label>
                         <input class="form-control" type="text" id="search-input"/>
+                        <select id="search-type" class="form-control">
+                            <option value="student">Student Email</option>
+                            <option value="assignment">Assignment Name</option>
+                            <option value="subject">Subject</option>
+                            <option value="date-before">Submitted Date (Before selected)</option>
+                            <option value="date-after">Submitted Date (After selected)</option>
+                        </select>
                         <button class="form-control" id="search"><span class="glyphicon glyphicon-search"></span></button>
                     </div>
                 </div>

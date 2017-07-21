@@ -61,10 +61,19 @@ function GetAllCompletionRecords(Repository $repo) {
  * assignmentIDs are 38-character UUIDs (including {})
  * Response body JSON: same as above
  */
-function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentID) {
+function getCompletionRecordsForAssignmentID(Repository $repo, string $assignmentID) {
     $records = $repo->getCompletionRecordsForAssignment($assignmentID);
     if ($records) {
         respond(200, json_encode($records));
+    } else {
+        respond(404);
+    }
+}
+
+function getCompletionRecordsForAssignmentName(Repository $repo, string $assignmentName) {
+    $records = $repo->getCompletionRecordsForAssignmentName($assignmentName);
+    if ($records) {
+        Respond(200, json_encode($records));
     } else {
         respond(404);
     }
@@ -75,8 +84,37 @@ function GetCompletionRecordsForAssignment(Repository $repo, string $assignmentI
  * Retrieve all completion records for the indicated student
  */
 
-function GetCompletionRecordsForStudent(Repository $repo, string $studentEmail) {
+function getCompletionRecordsForStudent(Repository $repo, string $studentEmail) {
     $records = $repo->getCompletionRecordsForStudent($studentEmail);
+    if ($records) {
+        respond(200, json_encode($records));
+    } else {
+        respond(404);
+    }
+}
+
+function filterRecords(string $type, string $filter) {
+    global $repository;
+    $records = false;
+    switch ($type) {
+        case "student":
+            $records = $repository->getCompletionRecordsForStudent($filter);
+            break;
+        case "assignment":
+            $records = $repository->getCompletionRecordsForAssignmentName($filter);
+            break;
+        case "subject":
+            $records = $repository->getCompletionRecordsForSubject($filter);
+            break;
+        case "date-before":
+            $records = $repository->getCompletionRecordsBeforeDate($filter);
+            break;
+        case "date-after":
+            $records = $repository->getCompletionRecordsAfterDate($filter);
+            break;
+        default:
+            break;
+    }
     if ($records) {
         respond(200, json_encode($records));
     } else {
@@ -90,30 +128,22 @@ function main() {
     header("Access-Control-Allow-Headers: *");
     header("Content-Type: application/json");
     global $repository;
-    $method = $_SERVER['REQUEST_METHOD'];//filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+    $method = $_SERVER['REQUEST_METHOD'];
     switch ($method) {
         case 'GET':
-            $student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_EMAIL);
-            $assignment = filter_input(INPUT_GET, 'assignment', FILTER_SANITIZE_STRING);
-            if ($student) {
-                debug_log("GETting records for student: ".$student);
-                GetCompletionRecordsForStudent($repository, $student);
-                break;
-            }
-            elseif ($assignment) {
-                debug_log("GETting records for assignment: ".$assignment);
-                GetCompletionRecordsForAssignment($repository, $assignment);
-                break;
+            $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_STRING);
+            $filter = filter_input(INPUT_GET, 'value', FILTER_SANITIZE_STRING);
+            if (!$type) {
+                GetAllCompletionRecords($repository);
             }
             else {
-                debug_log("GETting all records");
-                GetAllCompletionRecords($repository);
-                break;
+                filterRecords($type, $filter);
             }
+            break;
         case 'POST':
             $post_data = file_get_contents('php://input');
             $data = json_decode($post_data, true);
-            $isValidJSON = ValidateInput($data);
+            $isValidJSON = validateInput($data);
             if ($isValidJSON) {
                 debug_log("POSTing record for student: ".$data["studentEmail"]." and assignment: ".$data["assignmentID"]);
                 AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
@@ -126,7 +156,7 @@ function main() {
     }
 }
 
-function ValidateInput(Array $data) {
+function validateInput(Array $data) {
     $emailMatches = preg_match('/^[a-zA-Z]*@tampaprep\.org/', $data['studentEmail']);
     $assignmentMatches = preg_match('/^[0-9A-Fa-f\-]{36}/', $data['assignmentID']);
     if (!$emailMatches) {
