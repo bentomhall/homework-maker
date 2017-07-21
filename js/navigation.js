@@ -234,7 +234,6 @@ function addQuestion(index) {
 function createFromJson () {
     var data = $('#output-json').val(),
         json = JSON.parse(data);
-    json['images'] = [];
     if (json['title'] === undefined || json['questions'].length === 0) {
         alert('Must supply valid JSON');
         return false;
