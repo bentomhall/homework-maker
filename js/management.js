@@ -10,6 +10,9 @@ $(document.body).ready(function(){
             filterType = $("#search-type").val();
         filterRecords(searchString, filterType);
     });
+    $("#search-type").change(function() {
+       $("#search-input").empty(); 
+    });
 });
 
 function Filter(type, value) {
@@ -24,7 +27,7 @@ function filterRecords(search, filterType) {
 }
 
 function generateTableRow(record, index){
-    return `<tr id="record${index}"><td>${record.assignmentName}</td><td class="student">${record.studentEmail}</td><td class='timestamp'>${record.completedOn}</td>/tr>`;
+    return $(`<tr id="record${index}"><td scope="row">${record.assignmentName}</td><td>${record.studentEmail}</td><td class=>${record.completedOn}</td><td>${record.subjectName}</td></tr>`);
 }
 
 function generateEmptyTable(){
@@ -54,15 +57,11 @@ function retrieveCompletionRecords(filterObject) {
         url;
     if (filterObject === null) {
         url = baseURL + 'completions'; //get all completion data
-        console.log('filterObject is null, getting all records from '+url);
     } else {
         //values are pre-sanitized and server uses prepared statement.
-        url = baseURL + `completions?type=${filterObject.filterType}&value=${filterObject.filterValue}`; //filter on server
+        url = baseURL + `completions?type=${filterObject.filterType}&value=${filterObject.filterValue}`;
     }
-    $.get({
-        url: url,
-        success: handler
-    }).fail(function(data){
+    $.get({url: url, success: handler}).fail(function(data){
         onError(data);
     });
 }

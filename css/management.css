@@ -8,6 +8,7 @@ and open the template in the editor.
     Author     : bhall
 */
 
+/*
 .completion-records {
     width: 100%;
 }
@@ -21,4 +22,9 @@ tr {
     display: flex;
     justify-content: space-between;
     flex-flow: row;
+}
+*/
+
+td {
+    text-align: center;
 }

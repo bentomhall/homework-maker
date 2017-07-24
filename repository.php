@@ -36,11 +36,10 @@ class Repository {
     
     function saveAssignment(string $title, string $uuid, int $subjectId) {
         $stmt = $this->database->prepare("INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?)");
-        if (!($stmt)) {
-            log_error("Failed to prepare statement", $this->database->error);
-            throw new Exception("Failed to prepare statement: ".$this->database->error);
-        }
         $stmt->execute([$title, $subjectId, $uuid]);
+        if ($stmt->errorCode() != 0) {
+            $this->handleStatementError($stmt->errorInfo());
+        }
         return true;
     }
 
@@ -56,62 +55,86 @@ class Repository {
     function insertCompletion($student, $assigmentUUID) {
         $stmt = $this->database->prepare("CALL insertCompletion(?,?)");
         $stmt->execute([$student, $assigmentUUID]);
+        if ($stmt->errorCode() != 0) {
+            $this->handleStatementError($stmt->errorInfo());
+        }
         return;
     }
     
     function getAllCompletionRecords() {
-        $result = $this->database->query("SELECT * FROM completionreport");
-        return $this->createRecordsFromResult($result);
+        $query = $this->completionView . "WHERE 1=1";
+        return $this->execute($query, null);
     }
     
     function getCompletionRecordsForAssignment(string $assignmentID) {
-        $stmt = $this->database->prepare("Select * FROM completionreport WHERE assignment_id = ? ORDER BY completed_on");
-        $stmt->execute([$assignmentID]);
-        $result = $stmt->fetchAll();
-        return $this->createRecordsFromResult($result);
+        $query = $this->completionView . "WHERE assignment_id = ? ORDER BY completed_on";
+        return $this->execute($query, [$assignmentID]);
     }
     
     function getCompletionRecordsForStudent(string $studentEmail) {
-        $stmt = $this->database->prepare("Select * FROM completionreport WHERE student_email = ? ORDER BY completed_on");
-        $stmt->execute([$studentEmail]);
-        $result = $stmt->fetchAll();
-        return $this->createRecordsFromResult($result);
+        $query = $this->completionView . "WHERE student_email = ? ORDER BY completed_on";
+        return $this->execute($query, [$studentEmail]);
     }
     
     function getCompletionRecordsForAssignmentName(string $assignmentName) {
-        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE title = ? ORDER BY completed_on");
-        $stmt->execute([$assignmentName]);
-        $result = $stmt->fetchAll();
-        return $this->createRecordsFromResult($result);
+        $query = $this->completionView . "WHERE title = ? ORDER BY completed_on";
+        return $this->execute($query, [$assignmentName]);
     }
     
     function getCompletionRecordsForSubject(string $subject) {
-        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE name = ? ORDER BY completed_on");
-        $stmt->execute([$subject]);
-        return $this->createRecordsFromResult($stmt->fetchAll());
+        $query = $this->completionView . "WHERE subject_name = ? ORDER BY completed_on";
+        return $this->execute($query, [$subject]);
     }
     
     function getCompletionRecordsBeforeDate(string $date) {
-        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE completed_on < ? ORDER BY completed_on");
-        $stmt->execute([$date]);
-        return $this->createRecordsFromResult($stmt->fetchAll());
+        $query = $this->completionView . "WHERE completed_on < ? ORDER BY completed_on";
+        return $this->execute($query, [$date]);
     }
     
     function getCompletionRecordsAfterDate(string $date) {
-        $stmt = $this->database->prepare("SELECT * FROM completionreport WHERE completed_on > ? ORDER BY completed_on");
-        $stmt->execute([$date]);
+        $query = $this->completionView . "WHERE completed_on > ? ORDER BY completed_on";
+        return $this->execute($query, [$date]);
+    }
+    
+    private function execute($query, $data) {
+        $stmt = $this->database->prepare($query);
+        if ($stmt->errorCode() != 0) {
+            $this->handleStatementError($stmt->errorInfo());
+        }
+        if (is_null($data)) {
+            $stmt->execute();
+        } else {
+            $stmt->execute($data);
+        }
         return $this->createRecordsFromResult($stmt->fetchAll());
     }
     
     private function createRecordsFromResult($result) {
         $output = array();
         foreach ($result as $row) {
-            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"]);
+            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"], $row["subject_name"]);
             $output[] = $record;
        	}
         return $output;
     }
     
+    private function handleStatementError($error) {
+        log_error("Failed to prepare statement", $error);
+        throw new Exception("Failed to prepare statement: ".$error);
+    }
+    
+    private $completionView = <<<EOT
+SELECT c.id AS id,
+       c.student_email AS student_email,
+       a.title AS title,
+       c.completed_on AS completed_on,
+       s.name AS subject_name,
+       a.uuid AS assignment_id
+FROM completion c
+    LEFT JOIN assignment a ON c.assignment_id = a.id
+    LEFT JOIN subject s ON a.subject = s.id
+
+EOT;
 }
 
 class CompletionRecord {
@@ -119,12 +142,14 @@ class CompletionRecord {
     public $assignmentName = "";
     public $completedOn;
     public $assignmentID = "";
+    public $subjectName = "";
     
-    function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID) {
+    function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID, string $subject) {
         $this->studentEmail = $email;
         $this->assignmentID = $assignmentID;
         $this->assignmentName = $assignmentName;
         $this->completedOn = $completionDate;
+        $this->subjectName = $subject;
     }
 }
 
