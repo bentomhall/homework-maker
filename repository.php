@@ -35,12 +35,15 @@ class Repository {
     }
     
     function saveAssignment(string $title, string $uuid, int $subjectId) {
-        $stmt = $this->database->prepare("INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?)");
-        $stmt->execute([$title, $subjectId, $uuid]);
-        if ($stmt->errorCode() != 0) {
-            $this->handleStatementError($stmt->errorInfo());
-        }
-        return true;
+        $query = "INSERT INTO assignment(title, subject, uuid) VALUES(?, ?, ?)";
+        $this->insert($query, [$title, $subjectId, $uuid]);
+        return;
+    }
+    
+    function addSubject(string $name) {
+        $query = "INSERT INTO subject(name) VALUES(?)";
+        $this->insert($query, [$name]);
+        return;
     }
 
     function getSubjectCodes() {
@@ -53,11 +56,8 @@ class Repository {
     }
     
     function insertCompletion($student, $assigmentUUID) {
-        $stmt = $this->database->prepare("CALL insertCompletion(?,?)");
-        $stmt->execute([$student, $assigmentUUID]);
-        if ($stmt->errorCode() != 0) {
-            $this->handleStatementError($stmt->errorInfo());
-        }
+        $query = "CALL insertCompletion(?,?)";
+        $this->insert($query, [$student, $assigmentUUID]);
         return;
     }
     
@@ -94,6 +94,19 @@ class Repository {
     function getCompletionRecordsAfterDate(string $date) {
         $query = $this->completionView . "WHERE completed_on > ? ORDER BY completed_on";
         return $this->execute($query, [$date]);
+    }
+    
+    private function insert($query, $data) {
+        $stmt = $this->database->prepare($query);
+        if ($stmt->errorCode() != 0) {
+            $this->handleStatementError($stmt->errorInfo());
+        }
+        if (is_null($data)) {
+            $stmt->execute();
+        } else {
+            $stmt->execute($data);
+        }
+        return;
     }
     
     private function execute($query, $data) {
