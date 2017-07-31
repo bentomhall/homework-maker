@@ -7,15 +7,15 @@
  */
 
 require "repository.php";
-
-$post_data = file_get_contents("php://input");
-$subject = json_decode($post_data,true)["subject"];
-if (!isset($subject)) {
-    http_response_code(400);
-    echo "Malformed JSON: missing subject";
-}
 $credentials = getCredentials();
+$post_data = file_get_contents("php://input");
+$data = json_decode($post_data,true);
+if (!isset($data["subject"])|| !isset($data["api"]) || $data["api"] != $credentials["apiToken"]) {
+    http_response_code(400);
+    die();
+}
 $repo = new Repository($credentials);
+$subject = $data["subject"];
 try {
     $repo->addSubject($subject);
 } catch (Exception $exc) {

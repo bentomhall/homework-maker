@@ -15,6 +15,7 @@ function getCredentials() {
     $creds["user"] = $json["dbUser"];
     $creds["secret"] = $json["dbSecret"];
     $creds["database"] = $json["database"];
+    $creds["apiToken"] = $json["apiKey"];
     return $creds;
 }
 
@@ -41,6 +42,12 @@ class Repository {
     }
     
     function addSubject(string $name) {
+        $subjectCodes = $this->getSubjectCodes();
+        if (!isset($subjectCodes[$name])) {
+            //subject is not already present
+	    $query = "INSERT INTO subject(name) VALUES(?)";
+            $this->insert($query, [$name]);
+        }
         $query = "INSERT INTO subject(name) VALUES(?)";
         $this->insert($query, [$name]);
         return;
