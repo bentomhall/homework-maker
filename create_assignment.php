@@ -267,9 +267,7 @@ function validate_json($json){
 function saveAssignment(Repository $repo, $title, $subject, $uuid) {
     $subjectIDs = $repo->getSubjectCodes();
     if (key_exists($subject, $subjectIDs)) {
-        if (!($repo->saveAssignment($title, $uuid, $subjectIDs[$subject]))) {
-            Respond(500, "Internal Server Error");
-        }
+        $repo->saveAssignment($title, $uuid, $subjectIDs[$subject]);
     } else {
         Respond(400, "Invalid request body--subject not found");
     }
@@ -303,8 +301,8 @@ try {
 }
 
 $output = $outputData->createZip($uuid);
-$downloadTemplate = new Template(DOCUMENT_ROOT."/templates/download.tmpl");
+$downloadTemplate = new Template(__DIR__."/templates/download.tmpl");
 $downloadTemplate->set("url", "downloads/download.php?name=$output");
 Respond(200, $downloadTemplate->output());
 $date = date('M/d/Y h:i');
-file_put_contents('usage_log.log', "Processed $title on $date", FILE_APPEND);
+file_put_contents(__DIR__.'/usage_log.log', "Processed $title on $date".PHP_EOL, FILE_APPEND);

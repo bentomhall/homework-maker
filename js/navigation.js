@@ -35,6 +35,12 @@ $(document.body).ready(function(){
     });
 });
 
+function htmlencode(str) {
+    return str.replace(/[<>"']/g, function($0) {
+        return "&" + {"<":"lt",">":"gt", '"': "quot", "'":"#39"}[$0] + ";";
+    });
+}
+
 function addImagePrompt() {
     var element = $("#image-names"),
         node = $('<input type="text" class="form-control image-name" placeholder="Image file (from uploads)">');
@@ -194,28 +200,28 @@ function addQuestion(index) {
         id = (index > -1? 'tr#question' + (index + 1) : null),
         answerElements = '',
         imageNames = [];
-    question['title'] = $('#question-title').val();
-    question['text'] = $('#question-text').val();
-    question['hint'] = $('#question-hint').val();
+    question['title'] = htmlencode($('#question-title').val());
+    question['text'] = htmlencode($('#question-text').val());
+    question['hint'] = htmlencode($('#question-hint').val());
     question['image-names'] = getImageNames($('.image-name'));
     
     question['type'] = questionType;
     if (questionType === 'multiple-choice' || questionType === 'multiple-selection') {
         prompts = [];
         $(".prompt-item").each(function (index, element) {
-            prompts.push(element.value);
+            prompts.push(htmlencode(element.value));
         });
         question['prompts'] = prompts;
         if (questionType === 'multiple-choice') {
-            question['answer'] = $('input[name=correct-answer]:checked').val();
+            question['answer'] = htmlencode($('input[name=correct-answer]:checked').val());
         } else {
             $('.prompts ol').find('input[name=correct-answer]:checked').each(function(i, e) {
-                answerElements += ' '+e.value;
+                answerElements += ' '+htmlencode(e.value);
             });
             question['answer'] = answerElements.trim();
         }
     } else {
-        question['answer'] = $('#question-answer').val();
+        question['answer'] = htmlencode($('#question-answer').val());
     }
     if (index !== -1){
         document.assignment.questions[index] = question;
