@@ -157,7 +157,7 @@ function main() {
 }
 
 function validateInput(Array $data) {
-    $emailMatches = preg_match('/^[a-zA-Z]*@tampaprep\.org/', $data['studentEmail']);
+    $emailMatches = preg_match('/^[a-zA-Z.]*@tampaprep\.org/', $data['studentEmail']);
     $assignmentMatches = preg_match('/^[0-9A-Fa-f\-]{36}/', $data['assignmentID']);
     if (!$emailMatches) {
         debug_log("Invalid email: received ".$data['studentEmail']);

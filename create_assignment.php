@@ -180,16 +180,19 @@ class Template {
 
 function sanitize($data){
         $sanitized = htmlspecialchars($data, ENT_QUOTES);
-        $patterns = Array('/\^(.?)\^/',
-                     '/_(.?)_/',
-                     '/\[LIST\](.*)\[\/LIST\]/',
-                     '/\[B\](.*)\[\/B\]/',
-                     '/\[_]/');
+        $patterns = Array('/\^(.*?)\^/',
+                     '/_(.*?)_/',
+                     '/\[LIST\](.*?)\[\/LIST\]/',
+                     '/\[B\](.*?)\[\/B\]/',
+                     '/\[_\]/',
+                     '/\[I\](.*?)\[\/I\]/');
         $replacements = Array('<sup>${1}</sup>', 
                               '<sub>${1}</sub>', 
                               '<ul>${1}</ul>', 
                               '<b>${1}</b>', 
-                              '____________');
+                              '____________',
+                              '<i>${1}</i>');
+                              
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
         //do <li> replacement first, then match outer pattern
