@@ -103,6 +103,28 @@ class Repository {
         return $this->execute($query, [$date]);
     }
     
+    function getModulesWithActivity() {
+        $query = <<<EOT
+SELECT m.title AS Title,
+COUNT(c.assignment_id) AS AssignmentCount,
+    MAX(c.completed_on) AS LastCompleted,
+    s.name AS Subject
+FROM assignment m
+JOIN completion c
+    ON c.assignment_id = m.id
+JOIN subject s
+    ON s.id = m.subject
+GROUP BY Title, Subject
+ORDER BY LastCompleted DESC
+EOT;
+        $stmt = $this->database->prepare($query);
+        if ($stmt->errorCode() != 0) {
+            $this->handleStatementError($stmt->errorInfo());
+        }
+        $stmt->execute();
+        return $this->createActivityRecord($stmt->fetchAll());
+    }
+    
     private function insert($query, $data) {
         $stmt = $this->database->prepare($query);
         if ($stmt->errorCode() != 0) {
@@ -138,13 +160,22 @@ class Repository {
         return $output;
     }
     
+    private function createActivityRecord($result) {
+        $output = array();
+        foreach ($result as $row) {
+            $record = new ActivityRecord($row["Title"], $row["AssignmentCount"], $row["Subject"]);
+            $output[] = $record;
+       	}
+        return $output;
+    }
+    
     private function handleStatementError($error) {
         log_error("Failed to prepare statement", $error);
         throw new Exception("Failed to prepare statement: ".$error);
     }
     
     private $completionView = <<<EOT
-SELECT c.id AS id,
+SELECT DISTINCT c.id AS id,
        c.student_email AS student_email,
        a.title AS title,
        c.completed_on AS completed_on,
@@ -153,7 +184,6 @@ SELECT c.id AS id,
 FROM completion c
     LEFT JOIN assignment a ON c.assignment_id = a.id
     LEFT JOIN subject s ON a.subject = s.id
-
 EOT;
 }
 
@@ -170,6 +200,18 @@ class CompletionRecord {
         $this->assignmentName = $assignmentName;
         $this->completedOn = $completionDate;
         $this->subjectName = $subject;
+    }
+}
+
+class ActivityRecord {
+    public $assignmentName = "";
+    public $assignmentCount = 0;
+    public $subject = "";
+    
+    function __construct(string $name, int $count, string $subject) {
+        $this->assignmentCount = $count;
+        $this->assignmentName = $name;
+        $this->subject = $subject;
     }
 }
 

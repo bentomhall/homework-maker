@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+(function(){
+    this.rows = [];
 $(document.body).ready(function(){
-    retrieveCompletionRecords(null);
-    $("#search").click(function(){
-        var searchString = $("#search-input").val(),
-            filterType = $("#search-type").val();
-        filterRecords(searchString, filterType);
-    });
-    $("#search-type").change(function() {
-       $("#search-input").empty(); 
-    });
+    filterRecords("", "activity", false);
+});
+
+$('#recent-activity').on('click', '.activity-element', function(){
+    var assignmentName = $(this).children('.assignment-name').text();
+    filterRecords(assignmentName, 'assignment', true);
 });
 
 function Filter(type, value) {
@@ -20,28 +19,58 @@ function Filter(type, value) {
     this.filterValue = encodeURIComponent(value);
 }
 
-function filterRecords(search, filterType) {
-    var filter = new Filter(filterType, search);
-    $('#completion-records').empty();
-    retrieveCompletionRecords(filter);
+function ActivityRow(data) {
+    this.assignment = data.assignmentName;
+    this.subject = data.Subject;
+    this.count = data.assignmentCount;
+    this.toHTML = function(index) {
+        return $(`<ul class="activity-element" id="element${index}"><li class="assignment-name">${this.assignment}</li><li>${this.subject}</li><li>Completed ${this.count} times</li></ul>`);
+    };
 }
 
-function generateTableRow(record, index){
-    return $(`<tr id="record${index}"><td scope="row">${record.assignmentName}</td><td>${record.studentEmail}</td><td class=>${record.completedOn}</td><td>${record.subjectName}</td></tr>`);
+function DetailItem(data) {
+    this.student = data.studentEmail;
+    this.completedOn = data.completedOn;
+    this.toHTML = function() {
+        return $(`<ul class="record"><li>${this.student}</li><li>${this.completedOn}</li></ul>`);
+    };
 }
+
+function filterRecords(search, filterType, isDetail=false) {
+    var filter = new Filter(filterType, search);
+    retrieveCompletionRecords(filter, isDetail);
+}
+
+//function generateTableRow(record, index){
+//    return $(`<tr id="record${index}"><td scope="row">${record.assignmentName}</td><td>${record.studentEmail}</td><td>${record.completedOn}</td><td>${record.subjectName}</td></tr>`);
+//}
 
 function generateEmptyTable(){
-    return `<tr><td>No Results</td><td></td><td></td></tr>`;
+    return $(`<ul class="activity-element"><li>No Results</li></ul>`);
 }
 
 function fillTable(data) {
-    var element = $('#completion-records');
+    var element = $('#recent-modules');
     if (data.length === 0 || "undefined" === typeof data.length) {
         element.empty();
         element.append(generateEmptyTable());
     } else {
         data.forEach(function (record, index, array) {
-            element.append(generateTableRow(record, index));
+            var item = new ActivityRow(record);
+            element.append(item.toHTML(index));
+        });
+    }
+}
+
+function fillDetail(data) {
+    var element = $('#completions');
+    if (data.length === 0 || "undefined" === typeof data.length) {
+        element.empty();
+        element.append(generateEmptyTable());
+    } else {
+        data.forEach(function (record) {
+            var item = new DetailItem(record);
+            element.append(item.toHTML());
         });
     }
 }
@@ -51,9 +80,9 @@ function onError(error) {
     fillTable({});
 }
 
-function retrieveCompletionRecords(filterObject) {
-    var baseURL = 'http://localhost:8080/api/', //https://teaching.admiralbenbo.org/api/',
-        handler = fillTable,
+function retrieveCompletionRecords(filterObject, isDetail=false) {
+    var baseURL = 'https://teaching.admiralbenbo.org/api/',
+        handler = isDetail ? fillTable : fillDetail,
         url;
     if (filterObject === null) {
         url = baseURL + 'completions'; //get all completion data
@@ -65,3 +94,4 @@ function retrieveCompletionRecords(filterObject) {
         onError(data);
     });
 }
+})();

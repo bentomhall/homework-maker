@@ -112,6 +112,8 @@ function filterRecords(string $type, string $filter) {
         case "date-after":
             $records = $repository->getCompletionRecordsAfterDate($filter);
             break;
+        case "activity":
+            $records = $repository->getModulesWithActivity();
         default:
             break;
     }
