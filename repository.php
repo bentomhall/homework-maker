@@ -69,37 +69,38 @@ class Repository {
     }
     
     function getAllCompletionRecords() {
-        $query = $this->completionView . "WHERE 1=1";
+        $query = $this->completionView . " WHERE 1=1";
         return $this->execute($query, null);
     }
     
     function getCompletionRecordsForAssignment(string $assignmentID) {
-        $query = $this->completionView . "WHERE assignment_id = ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE a.assignment_id = ? ORDER BY c.completed_on";
         return $this->execute($query, [$assignmentID]);
     }
     
     function getCompletionRecordsForStudent(string $studentEmail) {
-        $query = $this->completionView . "WHERE student_email = ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE c.student_email = ? ORDER BY c.completed_on";
         return $this->execute($query, [$studentEmail]);
     }
     
     function getCompletionRecordsForAssignmentName(string $assignmentName) {
-        $query = $this->completionView . "WHERE title = ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE a.title = ? ORDER BY c.completed_on";
         return $this->execute($query, [$assignmentName]);
     }
     
     function getCompletionRecordsForSubject(string $subject) {
-        $query = $this->completionView . "WHERE subject_name = ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE s.name = ? ORDER BY c.completed_on";
+        
         return $this->execute($query, [$subject]);
     }
     
     function getCompletionRecordsBeforeDate(string $date) {
-        $query = $this->completionView . "WHERE completed_on < ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE c.completed_on < ? ORDER BY c.completed_on";
         return $this->execute($query, [$date]);
     }
     
     function getCompletionRecordsAfterDate(string $date) {
-        $query = $this->completionView . "WHERE completed_on > ? ORDER BY completed_on";
+        $query = $this->completionView . " WHERE c.completed_on > ? ORDER BY c.completed_on";
         return $this->execute($query, [$date]);
     }
     
@@ -114,7 +115,7 @@ JOIN completion c
     ON c.assignment_id = m.id
 JOIN subject s
     ON s.id = m.subject
-GROUP BY m.title, s.subject
+GROUP BY m.title, s.name
 ORDER BY MAX(c.completed_on) DESC
 EOT;
         $stmt = $this->database->prepare($query);
@@ -175,7 +176,7 @@ EOT;
     }
     
     private $completionView = <<<EOT
-SELECT DISTINCT c.id AS id,
+SELECT c.id AS id,
        c.student_email AS student_email,
        a.title AS title,
        c.completed_on AS completed_on,
