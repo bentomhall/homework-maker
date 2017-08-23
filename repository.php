@@ -114,8 +114,8 @@ JOIN completion c
     ON c.assignment_id = m.id
 JOIN subject s
     ON s.id = m.subject
-GROUP BY Title, Subject
-ORDER BY LastCompleted DESC
+GROUP BY m.title, s.subject
+ORDER BY MAX(c.completed_on) DESC
 EOT;
         $stmt = $this->database->prepare($query);
         if ($stmt->errorCode() != 0) {

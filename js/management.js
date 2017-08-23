@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 (function(){
-    this.rows = [];
+    
 $(document.body).ready(function(){
     filterRecords("", "activity", false);
 });
@@ -37,13 +37,10 @@ function DetailItem(data) {
 }
 
 function filterRecords(search, filterType, isDetail=false) {
+    $('#completions').clear();
     var filter = new Filter(filterType, search);
     retrieveCompletionRecords(filter, isDetail);
 }
-
-//function generateTableRow(record, index){
-//    return $(`<tr id="record${index}"><td scope="row">${record.assignmentName}</td><td>${record.studentEmail}</td><td>${record.completedOn}</td><td>${record.subjectName}</td></tr>`);
-//}
 
 function generateEmptyTable(){
     return $(`<ul class="activity-element"><li>No Results</li></ul>`);

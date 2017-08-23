@@ -8,23 +8,34 @@ and open the template in the editor.
     Author     : bhall
 */
 
-/*
-.completion-records {
+ul {
+    box-sizing: border-box;
     width: 100%;
-}
-
-.completion-header {
-    width: 100%;
-}
-
-tr {
-    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
     display: flex;
-    justify-content: space-between;
-    flex-flow: row;
 }
-*/
 
-td {
-    text-align: center;
+ul:nth-child(1) {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+li {
+    flex: 0 0 40%;
+}
+
+.activity-element {
+    height: 3em;
+    flex-flow: column wrap;
+    align-items: space-between;
+    box-shadow: 2px 0px 2px black;
+}
+
+.record {
+    height: 2em;
+    flex-flow: row;
+    justify-content: space-around;
+    border-bottom: 1px solid black;
 }
