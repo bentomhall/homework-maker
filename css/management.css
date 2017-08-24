@@ -45,9 +45,17 @@ li {
 
 .record {
     height: 2em;
-    flex-flow: row;
-    justify-content: space-around;
+    flex-flow: column wrap;
     border-bottom: 1px solid black;
-    align-items: center;
+    align-items: flex-start;
     background-color: white;
+    justify-content: center;
+}
+
+.record > li {
+    text-align: left;
+}
+
+.record > .date {
+    text-align: right;
 }
