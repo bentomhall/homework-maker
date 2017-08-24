@@ -24,14 +24,12 @@ function ActivityRow(data) {
     this.subject = data.subject;
     this.count = data.assignmentCount;
     this.toHTML = function(index) {
-        
-        return $(`<ul class="activity-element" id="element${index}"><li class="cell-name">${this.assignment}</li><li>${this.subject}</li><li>${this.count} completion</li></ul>`);
+        var completionText = this.count > 1 ? `${this.count} completions` : `${this.count} completion`;
+        return $(`<ul class="activity-element" id="element${index}"><li class="cell-name">${this.assignment}</li><li>${this.subject}</li><li>${completionText}</li></ul>`);
     };
     this.container = function() {
-        
-    }
+    };
 }
-
 
 function DetailItem(data) {
     this.student = data.studentEmail;
@@ -85,8 +83,14 @@ function onError(error) {
     //fillTable({});
 }
 
+function getURL() {
+    var protocol = window.location.protocol,
+        host = '//' + window.location.host;
+    return protocol + host + '/api/';
+}
+
 function retrieveCompletionRecords(filterObject, isDetail=false) {
-    var baseURL = 'https://teaching.admiralbenbo.org/api/',
+    var baseURL = getURL(),
         handler = isDetail ? fillDetail : fillTable,
         url;
     if (filterObject === null) {

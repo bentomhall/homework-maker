@@ -125,10 +125,6 @@ function filterRecords(string $type, string $filter) {
 }
 
 function main() {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: *");
-    header("Access-Control-Allow-Headers: *");
-    header("Content-Type: application/json");
     global $repository;
     $method = $_SERVER['REQUEST_METHOD'];
     switch ($method) {
@@ -144,10 +140,10 @@ function main() {
             break;
         case 'POST':
             $post_data = file_get_contents('php://input');
+            debug_log($post_data);
             $data = json_decode($post_data, true);
             $isValidJSON = validateInput($data);
             if ($isValidJSON) {
-                debug_log("POSTing record for student: ".$data["studentEmail"]." and assignment: ".$data["assignmentID"]);
                 AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
             } else {
                 Respond(400, "Invalid format in JSON request");
@@ -172,4 +168,8 @@ function validateInput(Array $data) {
     return true;
 }
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: *");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
 main();
