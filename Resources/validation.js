@@ -1,13 +1,6 @@
 var activeQuestions = typeof(activeQuestions) === 'undefined' ? 4 : activeQuestions;
 var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmentSeed;
 
-document.getElementById("submit")
-        .addEventListener("keyup", function(event) {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                document.getElementById("submit").click();
-            }
-});
 function Validator() {
     this.validateNumericWithin = function (submitted, correct, tolerance) {
         "use strict";
