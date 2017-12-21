@@ -84,7 +84,6 @@ class Repository {
     }
     
     function getCompletionRecordsForAssignmentName(string $assignmentName) {
-        debug_log("Querying for assignment ".$assignmentName);
         $query = $this->completionView . " WHERE a.title = ? ORDER BY c.completed_on";
         return $this->execute($query, [$assignmentName]);
     }
