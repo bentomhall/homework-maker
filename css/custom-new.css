@@ -1,0 +1,58 @@
+
+.question-output {
+    width: 100%;
+    border: 1px solid black;
+}
+.question-header {
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.question-header th {
+    font-weight: bold;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+tbody {
+    border: 1px solid black;
+}
+
+.invalid {
+    color: red;
+}
+
+.prompts {
+    display: none;
+}
+
+.prompts li {
+    list-style: none;
+}
+
+#download-info {
+    display:none;
+}
+
+#output-json {
+    width: 100%;
+    height: 12em;
+}
+
+.panel, table {
+    margin-bottom: 10px;
+}
+
+.visible {
+    display: block;
+}
+
+tr.selected {
+    background-color: rgba(0,128,255,0.5);
+}
+
+button.on {
+    background-color: lightgreen;
+}
+
