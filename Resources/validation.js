@@ -205,9 +205,8 @@ function validateHomePageLinks() {
             link.className = "question incorrect";
         }
     }
-    if (validCount === activeQuestions) {
-        toggleCompletionCode();
-    }
+    var completion = validCount / activeQuestions*100.0;
+    toggleCompletionCode(completion);
 }
 
 function resetValidation(index) {
@@ -224,7 +223,7 @@ function resetAllValidation() {
     location.reload(true);
 }
 
-function sendCompletion() {
+function sendCompletion(complete) {
     var emailElement = document.getElementById("student-email"),
         user_info = emailElement.value,
         submit_button = document.getElementById("submit-button"),
@@ -244,6 +243,7 @@ function sendCompletion() {
     
     xhr.send(JSON.stringify({
         assignmentID: assignmentSeed,
-        studentEmail: user_info 
+        studentEmail: user_info,
+        completion: complete
     }));
 }
