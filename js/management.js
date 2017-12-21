@@ -34,8 +34,9 @@ function ActivityRow(data) {
 function DetailItem(data) {
     this.student = data.studentEmail;
     this.completedOn = data.completedOn;
+    this.complete = data.completion;
     this.toHTML = function() {
-        return $(`<ul class="record"><li>${this.student}</li><li class="date">${this.completedOn}</li></ul>`);
+        return $(`<ul class="record"><li>${this.student}</li><li class="date">${this.completedOn}</li><li><progress max='100' value="${this.complete}"><span>${this.complete}%</span></progress></li></ul>`);
     };
 }
 

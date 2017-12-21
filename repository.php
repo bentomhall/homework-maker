@@ -62,9 +62,9 @@ class Repository {
         return $subjectCodes;
     }
     
-    function insertCompletion($student, $assigmentUUID) {
-        $query = "CALL insertCompletion(?,?)";
-        $this->insert($query, [$student, $assigmentUUID]);
+    function insertCompletion($student, $assigmentUUID, $complete) {
+        $query = "CALL insertCompletion(?,?,?)";
+        $this->insert($query, [$student, $assigmentUUID, $complete]);
         return;
     }
     
@@ -84,6 +84,7 @@ class Repository {
     }
     
     function getCompletionRecordsForAssignmentName(string $assignmentName) {
+        debug_log("Querying for assignment ".$assignmentName);
         $query = $this->completionView . " WHERE a.title = ? ORDER BY c.completed_on";
         return $this->execute($query, [$assignmentName]);
     }
@@ -117,7 +118,6 @@ JOIN subject s
     ON s.id = m.subject
 GROUP BY m.title, s.name
 ORDER BY MAX(c.completed_on) DESC
-LIMIT 10
 EOT;
         $stmt = $this->database->prepare($query);
         if ($stmt->errorCode() != 0) {
@@ -156,7 +156,7 @@ EOT;
     private function createRecordsFromResult($result) {
         $output = array();
         foreach ($result as $row) {
-            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"], $row["subject_name"]);
+            $record = new CompletionRecord($row["student_email"], $row["title"], $row["completed_on"], $row["assignment_id"], $row["subject_name"],$row["percent_completed"]);
             $output[] = $record;
        	}
         return $output;
@@ -182,7 +182,8 @@ SELECT c.id AS id,
        a.title AS title,
        c.completed_on AS completed_on,
        s.name AS subject_name,
-       a.uuid AS assignment_id
+       a.uuid AS assignment_id,
+       COALESCE(c.complete,100.0) AS percent_completed
 FROM completion c
     LEFT JOIN assignment a ON c.assignment_id = a.id
     LEFT JOIN subject s ON a.subject = s.id
@@ -195,13 +196,15 @@ class CompletionRecord {
     public $completedOn;
     public $assignmentID = "";
     public $subjectName = "";
+    public $completion = 0.0;
     
-    function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID, string $subject) {
+    function __construct(string $email, string $assignmentName, string $completionDate, string $assignmentID, string $subject, float $complete) {
         $this->studentEmail = $email;
         $this->assignmentID = $assignmentID;
         $this->assignmentName = $assignmentName;
         $this->completedOn = $completionDate;
         $this->subjectName = $subject;
+        $this->completion = $complete;
     }
 }
 

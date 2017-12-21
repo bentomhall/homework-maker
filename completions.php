@@ -19,17 +19,18 @@ function Respond(int $code, string $message = "") {
 
 //POST /api/completions
 /*
- * Add a completion to the database. Only 200 OK response on success.
+ * Add a completion to the database. Only 204 OK response on success.
  * JSON payload:
  * {
  *  "assignmentID": 38-character UUID string matching an assignment id,
  *  "studentEmail": email string to identify a particular student
+ *  "completion": float representing completion percentage (0-100)
  * } 
  */
 
-function AddCompletionRecord(Repository $repo, string $studentEmail, string $assignmentID) {
+function AddCompletionRecord(Repository $repo, string $studentEmail, string $assignmentID, float $complete) {
     try {
-        $repo->insertCompletion($studentEmail, $assignmentID);
+        $repo->insertCompletion($studentEmail, $assignmentID, $complete);
         debug_log("Inserted completion for student: ".$studentEmail." and assignment: ".$assignmentID);
     } catch (Exception $ex) {
         Respond(500, "Database Error: ".$ex->getMessage());
@@ -96,12 +97,14 @@ function getCompletionRecordsForStudent(Repository $repo, string $studentEmail) 
 function filterRecords(string $type, string $filter) {
     global $repository;
     $records = false;
+    debug_log("filtering on ".$type." with filter ". $filter);
     switch ($type) {
         case "student":
             $records = $repository->getCompletionRecordsForStudent($filter);
             break;
         case "assignment":
             $records = $repository->getCompletionRecordsForAssignmentName($filter);
+            debug_log("records:" . var_export($records, true));
             break;
         case "subject":
             $records = $repository->getCompletionRecordsForSubject($filter);
@@ -129,8 +132,9 @@ function main() {
     $method = $_SERVER['REQUEST_METHOD'];
     switch ($method) {
         case 'GET':
-            $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_STRING);
-            $filter = filter_input(INPUT_GET, 'value', FILTER_SANITIZE_STRING);
+            $type = filter_input(INPUT_GET, 'type');//, FILTER_SANITIZE_STRING);
+            $filter = filter_input(INPUT_GET, 'value');//, FILTER_SANITIZE_STRING);
+            
             if (!$type) {
                 GetAllCompletionRecords($repository);
             }
@@ -144,7 +148,11 @@ function main() {
             $data = json_decode($post_data, true);
             $isValidJSON = validateInput($data);
             if ($isValidJSON) {
-                AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID']);
+                if (is_null($data['complete'])) { 
+                    AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID'], 100.0);
+                } else {
+                    AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID'], $data['complete']);
+                }
             } else {
                 Respond(400, "Invalid format in JSON request");
             }
