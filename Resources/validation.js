@@ -4,10 +4,11 @@ var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmen
 function Validator() {
     this.validateNumericWithin = function (submitted, correct, tolerance) {
         "use strict";
+        var s = submitted.split(' ')[0];
         if (Number(correct) === 0) {
-            return Math.abs(submitted) <= tolerance;
+            return Math.abs(s) <= tolerance;
         } else {
-            return Math.abs(submitted - correct) / correct <= tolerance;
+            return Math.abs((s - correct) / correct) <= tolerance;
         }
     };
     

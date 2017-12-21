@@ -19,14 +19,16 @@ ul {
     
 }
 li {
-    flex: 0 0 40%;
     text-align: right;
     padding: 0 0.5em;
+    flex: 0 1 49%;
 }
+
 .cell-name {
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
     text-align: left;
+    flex: 1 0 70%;
 }
 
 .activity-element {
@@ -40,16 +42,17 @@ li {
 }
 
 .activity-element:hover {
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
 }
 
 .record {
     height: 2em;
     flex-flow: column wrap;
     border-bottom: 1px solid black;
-    align-items: flex-start;
-    background-color: white;
     justify-content: center;
+    background-color: white;
+    text-align: left;
+    align-items: flex-start;
 }
 
 .record > li {
@@ -58,4 +61,5 @@ li {
 
 .record > .date {
     text-align: right;
+    
 }

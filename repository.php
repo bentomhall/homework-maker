@@ -74,7 +74,7 @@ class Repository {
     }
     
     function getCompletionRecordsForAssignment(string $assignmentID) {
-        $query = $this->completionView . " WHERE a.assignment_id = ? ORDER BY c.completed_on";
+        $query = $this->completionView . " WHERE a.assignment_id = ? ORDER BY c.student_email";
         return $this->execute($query, [$assignmentID]);
     }
     
@@ -117,6 +117,7 @@ JOIN subject s
     ON s.id = m.subject
 GROUP BY m.title, s.name
 ORDER BY MAX(c.completed_on) DESC
+LIMIT 10
 EOT;
         $stmt = $this->database->prepare($query);
         if ($stmt->errorCode() != 0) {

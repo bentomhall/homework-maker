@@ -179,19 +179,21 @@ class Template {
 }
 
 function sanitize($data){
-        $sanitized = htmlspecialchars($data, ENT_QUOTES);
+        $sanitized = htmlspecialchars($data, ENT_NOQUOTES|ENT_HTML5);
         $patterns = Array('/\^(.*?)\^/',
                      '/_(.*?)_/',
                      '/\[LIST\](.*?)\[\/LIST\]/',
                      '/\[B\](.*?)\[\/B\]/',
                      '/\[_\]/',
-                     '/\[I\](.*?)\[\/I\]/');
+                     '/\[I\](.*?)\[\/I\]/',
+                     '/&amp;#39;/');
         $replacements = Array('<sup>${1}</sup>', 
                               '<sub>${1}</sub>', 
                               '<ul>${1}</ul>', 
                               '<b>${1}</b>', 
                               '____________',
-                              '<i>${1}</i>');
+                              '<i>${1}</i>',
+                              '&#39;');
                               
         $inner_pattern = '/\[\*\](.*?)\[\/\*\]/';
         $inner_replacement = '<li>${1}</li>';
