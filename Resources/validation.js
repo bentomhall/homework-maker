@@ -205,8 +205,8 @@ function validateHomePageLinks() {
             link.className = "question incorrect";
         }
     }
-    var completion = validCount / activeQuestions*100.0;
-    toggleCompletionCode(completion);
+    sessionStorage.SetItem('completion', validCount / activeQuestions*100.0 );
+    toggleCompletionCode();
 }
 
 function resetValidation(index) {
@@ -223,11 +223,12 @@ function resetAllValidation() {
     location.reload(true);
 }
 
-function sendCompletion(complete) {
+function sendCompletion() {
     var emailElement = document.getElementById("student-email"),
         user_info = emailElement.value,
         submit_button = document.getElementById("submit-button"),
-        xhr;
+        xhr,
+        complete = sessionStorage.getItem('completion')*1.0;
     if (!user_info || user_info.indexOf('@') === -1) {
         return;
     }

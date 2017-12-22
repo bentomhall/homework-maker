@@ -148,10 +148,10 @@ function main() {
             $data = json_decode($post_data, true);
             $isValidJSON = validateInput($data);
             if ($isValidJSON) {
-                if (is_null($data['complete'])) { 
+                if (is_null($data['completion'])) { 
                     AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID'], 100.0);
                 } else {
-                    AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID'], $data['complete']);
+                    AddCompletionRecord($repository, $data['studentEmail'], $data['assignmentID'], $data['completion']);
                 }
             } else {
                 Respond(400, "Invalid format in JSON request");
