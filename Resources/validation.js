@@ -1,6 +1,16 @@
 var activeQuestions = typeof(activeQuestions) === 'undefined' ? 4 : activeQuestions;
 var assignmentSeed = typeof(assignmentSeed) === 'undefined' ? 'ABCD' : assignmentSeed;
 
+document.addEventListener('DOMContentLoaded', function(event){
+    document.getElementById('answer-entry').addEventListener('keypress', function(event){
+        if (event.keyCode === 13){
+            event.preventDefault();
+            document.getElementById('submit').click();
+        } 
+    });
+});
+
+
 function Validator() {
     this.validateNumericWithin = function (submitted, correct, tolerance) {
         "use strict";
