@@ -215,7 +215,7 @@ function validateHomePageLinks() {
             link.className = "question incorrect";
         }
     }
-    sessionStorage.SetItem('completion', validCount / activeQuestions*100.0 );
+    sessionStorage.setItem('completion', validCount / activeQuestions*100.0 );
     toggleCompletionCode();
 }
 
