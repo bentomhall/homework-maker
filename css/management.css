@@ -62,5 +62,20 @@ li {
 
 .record > .date {
     text-align: right;
-    
+}
+
+.record progress {
+    position: relative;
+}
+
+.record progress:hover:after {
+    display: block;
+    position: absolute; 
+    top: -0.5em;
+    left: 50%;
+    content: attr(value);
+    text-align: center;
+    background: ghostwhite;
+    border: 1px solid grey;
+    font-size: 0.8em;
 }
