@@ -57,6 +57,7 @@ li {
 
 .record > li {
     text-align: left;
+    width: 33%;
 }
 
 .record > .date {

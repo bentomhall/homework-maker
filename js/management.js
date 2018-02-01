@@ -32,7 +32,7 @@ function ActivityRow(data) {
 }
 
 function DetailItem(data) {
-    this.student = data.studentEmail;
+    this.student = data.studentEmail.split('@')[0];
     this.completedOn = data.completedOn;
     this.complete = data.completion;
     this.toHTML = function() {
